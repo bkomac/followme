@@ -69,10 +69,12 @@ $("#startBtn").on(
 				tracking_data.push(position);
 				console.log("*" + JSON.stringify(position));
 				$("#list").html(
-						"<li> LAT: " + position.coords.latitude + " LON: "
-								+ position.coords.longitude + " alt: "
-								+ position.coords.altitude + " acccur: "
+						"<li> LAT: " + position.coords.latitude + "<br> LON: "
+								+ position.coords.longitude + "<br> alt: "
+								+ position.coords.altitude + "<br> acccur: "
 								+ position.coords.accuracy + "</li>");
+				
+				pingGPS(position.coords);
 			},
 
 			// Error
@@ -126,9 +128,8 @@ function geo_success(position) {
 	// map.setCenter(new google.maps.LatLng(position.coords.latitude,
 	// position.coords.longitude));
 
-	map.panTo(
-			new google.maps.LatLng(position.coords.latitude,
-					position.coords.longitude));
+	map.panTo(new google.maps.LatLng(position.coords.latitude,
+			position.coords.longitude));
 	// map.setZoom(15);
 
 	var info = ('Latitude: ' + position.coords.latitude + '<br>'

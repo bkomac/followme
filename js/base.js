@@ -1,10 +1,8 @@
 //config
-// https://perun.informatika.si/eRacunMOB/rs/uporabnik/login/bkomac:BOKO9085
-// http://komac.si/lab/api/rest.json
-// http://192.168.1.123:9086/eRacunMOB/rs/uporabnik/login
 
 //REST base url
-var remoteAddress = "";
+var remoteAddress = "http://tracksbox.net:18080/followme/ws/";
+//var remoteAddress = "http://cloud.komac.si/ws/";
 
 // security
 var hash = "";
@@ -15,12 +13,46 @@ function securityToken(token) {
 }
 
 // preset ajax calls
-$.ajaxSetup({
-	beforeSend : function(request) {
-		request.setRequestHeader("Authority", hash);
-	}
+// $.ajaxSetup({
+// beforeSend : function(request) {
+// request.setRequestHeader("Authority", hash);
+// }
+//
+// });
 
-});
+function pingGPS(trackpoint) {
+
+	$.ajax({
+		type : "GET",
+		url : remoteAddress,
+		dataType : "json",
+		jsonp : 'jsoncallback',
+		crossDomain : true,
+		cache : false,
+		data : {
+			lat : trackpoint.latitude,
+			lon : trackpoint.longitude,
+			altitude : trackpoint.altitude
+		},
+
+		error : function(xhr, ajaxOptions, thrownError) {
+			console.log("error: " + thrownError);
+		},
+		success : function(data) {
+			console.log("GET: " + JSON.stringify(data));
+		}
+	});
+}
+
+function saveOptions(options) {
+	localStorage.setItem("options", JSON.stringify(options));
+	$.followme.options = JSON.parse(localStorage.getItem("options"));
+}
+
+function getOptions() {
+	$.followme.options = JSON.parse(localStorage.getItem("options"));
+	return $.followme.options;
+}
 
 function getHmac(input) {
 	var out = "";
@@ -65,7 +97,17 @@ $.followme = {
 		name : null,
 		uid : null,
 		persist : false
+	},
+	options : {
+		pushInterval : 1000
 	}
-
 };
 
+var trackpoint = {
+	lat : null,
+	lng : null,
+	alt : null,
+	tst : null,
+	accur : null,
+	speed : null
+};
