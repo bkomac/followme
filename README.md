@@ -1,4 +1,4 @@
 followme
 ========
 
-Tracksbox mobile app
+Tracksbox mobile application built on Phonegap.
