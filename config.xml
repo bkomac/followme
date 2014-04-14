@@ -4,10 +4,10 @@
 <widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0"
 	id="net.tracksbox.followme" version="0.0.2">
 
-	<name>FollowMe</name>
+	<name>Follow Me</name>
 
 	<description>
-		GPS tracking application powered by TracksBox.net
+		TracksBox mobile app
 	</description>
 
 	<author href="http://tracksbox.net" email="info@trasksbox.net">
