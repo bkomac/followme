@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="format-detection" content="telephone=no" />
+<!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+<meta name="viewport"
+	content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+<link rel="stylesheet" type="text/css"
+	href="css/themes/jquery.mobile.theme-1.4.2.min.css">
+<link rel="stylesheet" type="text/css"
+	href="css/themes/jquery.mobile.icons.min.css">
+<link rel="stylesheet" type="text/css"
+	href="css/lib/jquery.mobile.structure-1.4.2.min.css">
+
+<script type="text/javascript" src="phonegap.js"></script>
+<script type="text/javascript"
+	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBSYl1raYuU-YkdJ_OZGDzuhlmHqi1HBzU&sensor=false"></script>
+
+<script type="text/javascript" src="js/lib/jquery-2.1.0.js"></script>
+<script type="text/javascript" src="js/lib/jquery.mobile-1.4.2.js"></script>
+
+<title>Follow Me</title>
+
+</head>
+<body onload="init()">
+
+
+	<!-- prva -->
+	<div data-role="page" id="prva" data-theme="a">
+		<div data-role="header" data-position="fixed" data-add-back-btn="true">
+			<a href="#myPanel" data-rel="back"
+				class="ui-btn-left ui-btn ui-btn-inline ui-corner-all ui-btn-icon-left ui-icon-bars ui-btn-icon-notext ui-alt-icon ui-nodisc-icon"></a>
+			<h2>Follow Me</h2>
+			<div data-role="navbar">
+				<ul>
+					<li><a href="#prva" data-icon="grid" data-transition="none"
+						class="ui-btn-active ui-state-persist" data-transition="none">Info</a></li>
+					<li><a href="#map_page" data-icon="star"
+						data-transition="none">Map</a></li>
+					<li><a href="#options_page" data-icon="gear"
+						data-transition="none">Options</a></li>
+				</ul>
+			</div>
+		</div>
+		<div data-role="main" class="ui-content">
+			<div id="one" class="ui-content">
+				<div id="menu1">
+					<button id="startBtn" class="ui-shadow ui-btn ui-corner-all">Start</button>
+					<button id="stopBtn" class="ui-shadow ui-btn ui-corner-all">Stop</button>
+
+				</div>
+
+				<ul id="list">
+				</ul>
+
+				<p id="msg"></p>
+			</div>
+
+
+		</div>
+
+		<div data-role="panel" id="myPanel" data-display="overlay"
+			data-position-fixed="true" data-theme="b">
+			<h2>Menu</h2>
+			<ul data-role="listview" data-transition="slide">
+
+				<li data-role="list-divider">Novice</li>
+				<li><a href="stanjeStevca.html" data-transition="slide">Novice</a></li>
+				<li><a href="zgodovinaPopisov.html" data-transition="slide">Obvestila</a></li>
+				<li><a href="infoObracun.htm" data-transition="slide">Akcije</a></li>
+
+				<li data-role="list-divider"></li>
+				<li><a href="prijava.html" data-transition="slide">Prijava</a></li>
+
+				<li data-role="list-divider">FollowMe</li>
+
+			</ul>
+		</div>
+
+	</div>
+
+	<!-- map -->
+	<div data-role="page" id="map_page" data-theme="a">
+		<div data-role="header" data-position="fixed" data-add-back-btn="true">
+			<a href="#myPanel" data-rel="back"
+				class="ui-btn-left ui-btn ui-btn-inline ui-corner-all ui-btn-icon-left ui-icon-bars ui-btn-icon-notext ui-alt-icon ui-nodisc-icon"></a>
+			<h2>Follow Me</h2>
+			<div data-role="navbar">
+				<ul>
+					<li><a href="#prva" data-icon="grid" data-transition="none">Info</a></li>
+					<li><a href="#map_page" data-icon="star"
+						data-transition="none" class="ui-btn-active ui-state-persist">Map</a></li>
+					<li><a href="#options_page" data-icon="gear"
+						data-transition="none">Options</a></li>
+				</ul>
+			</div>
+		</div>
+		<div data-role="main" class="ui-content">
+			<div id="map" style="height: 400px; margin: 0px; padding: 0px"></div>
+		</div>
+
+	</div>
+
+	<!-- options -->
+	<div data-role="page" id="options_page" data-theme="a">
+		<div data-role="header" data-position="fixed" data-add-back-btn="true">
+			<a href="#myPanel" data-rel="back"
+				class="ui-btn-left ui-btn ui-btn-inline ui-corner-all ui-btn-icon-left ui-icon-bars ui-btn-icon-notext ui-alt-icon ui-nodisc-icon"></a>
+			<h2>Follow Me</h2>
+			<div data-role="navbar">
+				<ul>
+					<li><a href="#prva" data-icon="grid" data-transition="none">Info</a></li>
+					<li><a href="#map_page" data-icon="star"
+						data-transition="none">Map</a></li>
+					<li><a href="#options_page" data-icon="gear"
+						class="ui-btn-active ui-state-persist" data-transition="none">Options</a></li>
+				</ul>
+			</div>
+		</div>
+		<div data-role="main" class="ui-content"></div>
+	</div>
+
+
+	<div data-role="footer" data-position="fixed" data-theme="a">
+		<h4 id="status"></h4>
+	</div>
+
+
+
+	<script type="text/javascript" src="js/index.js"></script>
+
+
+</body>
+</html>
