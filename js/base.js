@@ -2,7 +2,8 @@
 
 //REST base url
 var remoteAddress = "http://tracksbox.net:18080/followme/ws/";
-//var remoteAddress = "http://cloud.komac.si/ws/";
+// var remoteAddress = "http://cloud.komac.si/ws/";
+//var remoteAddress = "http://doma.komac.si:18080/followme/ws/";
 
 // security
 var hash = "";
@@ -21,10 +22,15 @@ function securityToken(token) {
 // });
 
 function pingGPS(trackpoint) {
+	getOptions();
+	var user = getUser();
+
+	console.log("GET: " + $.followme.options.remoteUrl + " user:" + user);
+	$("#msg").html("GET: " + $.followme.options.remoteUrl + " user:" + user);
 
 	$.ajax({
 		type : "GET",
-		url : remoteAddress,
+		url : $.followme.options.remoteUrl,
 		dataType : "json",
 		jsonp : 'jsoncallback',
 		crossDomain : true,
@@ -32,14 +38,21 @@ function pingGPS(trackpoint) {
 		data : {
 			lat : trackpoint.latitude,
 			lon : trackpoint.longitude,
-			altitude : trackpoint.altitude
+			altitude : trackpoint.altitude,
+			user : user,
+			speed : trackpoint.speed,
+			accur: trackpoint.accuracy 
+
 		},
 
 		error : function(xhr, ajaxOptions, thrownError) {
 			console.log("error: " + thrownError);
 		},
 		success : function(data) {
-			console.log("GET: " + JSON.stringify(data));
+			console.log("RESPONSE: " + JSON.stringify(data));
+			$("#msg").append(" - RESPONSE: " + JSON.stringify(data));
+			$("#followers").val(data.followers);
+			$.followme.followers = data.followers;
 		}
 	});
 }
@@ -50,7 +63,8 @@ function saveOptions(options) {
 }
 
 function getOptions() {
-	$.followme.options = JSON.parse(localStorage.getItem("options"));
+	if (localStorage.getItem("options") != null)
+		$.followme.options = JSON.parse(localStorage.getItem("options"));
 	return $.followme.options;
 }
 
@@ -72,14 +86,25 @@ function getUser() {
 	if (localStorage.getItem("user") != null)
 		return JSON.parse(localStorage.getItem("user"));
 	else
-		return null;
+		return "android";
 }
 
 function setUser(user) {
 	if (user != null) {
-		sessionStorage.setItem("user", JSON.stringify(user));
 		localStorage.setItem("user", JSON.stringify(user));
-		$.estoritve.user = user;
+	}
+}
+
+function getFrequency() {
+	if (localStorage.getItem("user") != null)
+		return JSON.parse(localStorage.getItem("user"));
+	else
+		return null;
+}
+
+function setFrequency(frequency) {
+	if (frequency != null) {
+		localStorage.setItem("frequency", JSON.stringify(frequency));
 	}
 }
 
@@ -90,7 +115,6 @@ function clearStorage() {
 }
 
 // entities
-
 $.followme = {
 	user : {
 		username : null,
@@ -99,8 +123,10 @@ $.followme = {
 		persist : false
 	},
 	options : {
-		pushInterval : 1000
-	}
+		pushInterval : 3,
+		remoteUrl : remoteAddress
+	},
+	followers : 0
 };
 
 var trackpoint = {

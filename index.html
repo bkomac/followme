@@ -26,17 +26,16 @@
 </head>
 <body onload="init()">
 
-
 	<!-- prva -->
 	<div data-role="page" id="prva" data-theme="a">
 		<div data-role="header" data-position="fixed" data-add-back-btn="true">
-			<a href="#myPanel" data-rel="back"
+			<a href="#myPanel"
 				class="ui-btn-left ui-btn ui-btn-inline ui-corner-all ui-btn-icon-left ui-icon-bars ui-btn-icon-notext ui-alt-icon ui-nodisc-icon"></a>
 			<h2>Follow Me</h2>
 			<div data-role="navbar">
 				<ul>
 					<li><a href="#prva" data-icon="grid" data-transition="none"
-						class="ui-btn-active ui-state-persist" data-transition="none">Info</a></li>
+						class="ui-btn-active ui-state-persist" data-transition="none">Logger</a></li>
 					<li><a href="#map_page" data-icon="star"
 						data-transition="none">Map</a></li>
 					<li><a href="#options_page" data-icon="gear"
@@ -52,7 +51,9 @@
 
 				</div>
 
-				<ul id="list">
+				<ul id="list" data-role="listview" data-count-theme="a"
+					data-inset="true">
+
 				</ul>
 
 				<p id="msg"></p>
@@ -66,26 +67,26 @@
 			<h2>Menu</h2>
 			<ul data-role="listview" data-transition="slide">
 
-				<li data-role="list-divider">Novice</li>
-				<li><a href="stanjeStevca.html" data-transition="slide">Novice</a></li>
-				<li><a href="zgodovinaPopisov.html" data-transition="slide">Obvestila</a></li>
-				<li><a href="infoObracun.htm" data-transition="slide">Akcije</a></li>
+				<li data-role="list-divider"></li>
+				<li><a href="#prva" data-transition="slide">Logger</a></li>
+				<li><a href="#map_page" data-transition="slide">Map</a></li>
+				<li><a href="#options_page" data-transition="slide">Options</a></li>
 
 				<li data-role="list-divider"></li>
-				<li><a href="prijava.html" data-transition="slide">Prijava</a></li>
-
-				<li data-role="list-divider">FollowMe</li>
-
+				<li><a id="exitLnk" href="#" data-transition="slide">Exit</a></li>
 			</ul>
 		</div>
 
+		<div data-role="footer" data-position="fixed" data-theme="a">
+			<h4 id="status"></h4>
+		</div>
 	</div>
 
 	<!-- map -->
 	<div data-role="page" id="map_page" data-theme="a">
 		<div data-role="header" data-position="fixed" data-add-back-btn="true">
-			<a href="#myPanel" data-rel="back"
-				class="ui-btn-left ui-btn ui-btn-inline ui-corner-all ui-btn-icon-left ui-icon-bars ui-btn-icon-notext ui-alt-icon ui-nodisc-icon"></a>
+			<a href="#prva"
+				class="ui-btn-left ui-btn ui-btn-inline ui-corner-all ui-btn-icon-left ui-icon-back ui-btn-icon-notext ui-alt-icon ui-nodisc-icon"></a>
 			<h2>Follow Me</h2>
 			<div data-role="navbar">
 				<ul>
@@ -106,8 +107,8 @@
 	<!-- options -->
 	<div data-role="page" id="options_page" data-theme="a">
 		<div data-role="header" data-position="fixed" data-add-back-btn="true">
-			<a href="#myPanel" data-rel="back"
-				class="ui-btn-left ui-btn ui-btn-inline ui-corner-all ui-btn-icon-left ui-icon-bars ui-btn-icon-notext ui-alt-icon ui-nodisc-icon"></a>
+			<a href="#prva"
+				class="ui-btn-left ui-btn ui-btn-inline ui-corner-all ui-btn-icon-left ui-icon-back ui-btn-icon-notext ui-alt-icon ui-nodisc-icon"></a>
 			<h2>Follow Me</h2>
 			<div data-role="navbar">
 				<ul>
@@ -119,7 +120,21 @@
 				</ul>
 			</div>
 		</div>
-		<div data-role="main" class="ui-content"></div>
+		<div data-role="main" class="ui-content">
+			<label for="text-basic">User:</label> <input name="text-basic"
+				data-clear-btn="true" id="user" value="" type="text"> <label
+				for="text-basic">Endpoint:</label> <input name="text-basic"
+				id="endpointInput" value="" type="url" data-mini="true"> <label
+				for="text-basic">Push interval: (s)</label> <input name="text-basic"
+				id="pushInterval" value="" min="1" max="60" step="1"
+				data-highlight="true" type="range"> <label for="followers">Followers:</label>
+			<input disabled="disabled" name="followers" id="followers" value=""
+				type="number">
+
+			<h4>Endpoints:</h4>
+			<p>http://cloud.komac.si/ws/</p>
+			<p>http://tracksbox.net:18080/followme/ws/</p>
+		</div>
 	</div>
 
 
