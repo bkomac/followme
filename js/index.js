@@ -73,8 +73,7 @@ $("#prva").on("beforepageshow", function(e) {
 // prva Show ********************************************
 $("#map_page").on("pageshow", function(e) {
 	detectBrowser();
-	//google.maps.event.addDomListener(window, 'load', mapInit);
-	mapInit();
+	//mapInit();
 });
 
 // options Show ********************************************
@@ -333,4 +332,4 @@ function detectBrowser() {
 	}
 }
 
-
+google.maps.event.addDomListener(window, 'load', mapInit);
