@@ -28,17 +28,15 @@ function documentready() {
 	try {
 
 		navigator.splashscreen.hide();
-		
+
 		document.addEventListener("menubutton", function() {
 			$("#myPanel").panel("open");
 		}, false);
-		
+
 	} catch (e) {
 		// TODO: handle exception
 	}
 }
-
-
 
 // on pageCreate *************************************
 $(document).on("pagecreate", "#prva", function() {
@@ -60,11 +58,11 @@ $("#prva").on("beforepageshow", function(e) {
 	$("[data-role='footer']").toolbar();
 	$("[data-role='footer'] h4").html("");
 	$("[data-role='footer']").show();
-	
-	if(isLoging){
+
+	if (isLoging) {
 		$("#startBtn").hide();
 		$("#stopBtn").show();
-	}else{
+	} else {
 		$("#startBtn").show();
 		$("#stopBtn").hide();
 	}
@@ -73,7 +71,7 @@ $("#prva").on("beforepageshow", function(e) {
 // prva Show ********************************************
 $("#map_page").on("pageshow", function(e) {
 	detectBrowser();
-	//mapInit();
+	// mapInit();
 });
 
 // options Show ********************************************
@@ -117,7 +115,7 @@ $("#exitLnk").on("click", function(e) {
 	console.log("*** exit...");
 	map = timer = poly = null;
 	navigator.app.exitApp();
-	
+
 });
 
 $("#startBtn").on("click", function(e) {
@@ -140,7 +138,7 @@ $("#stopBtn").on("click", function(e) {
 	console.log("*** stop");
 	clearInterval(timer);
 	timer = null;
-	
+
 	isLoging = false;
 	$("#msg").html("Stoped");
 	$("#status").html("Logging OFF");
@@ -157,9 +155,11 @@ function getLocation() {
 		getOptions();
 
 		$("#list").html(
-				"<li style='padding:6px'><a> LAT: " + position.coords.latitude + "<br> LON: " + position.coords.longitude + "<br> alt: "
-						+ position.coords.altitude + "<br> acccur: " + position.coords.accuracy + "<span class='ui-li-count'>"+$.followme.followers+"</span></a></li>");
-		
+				"<li style='padding:6px'><a> LAT: " + position.coords.latitude + "<br> LON: "
+						+ position.coords.longitude + "<br> alt: " + position.coords.altitude + "<br> acccur: "
+						+ position.coords.accuracy + "<span class='ui-li-count'>" + $.followme.followers
+						+ "</span></a></li>");
+
 		if (isLoging) {
 			pingGPS(position.coords);
 
@@ -257,7 +257,9 @@ function mapInit() {
 
 function geo_error(error) {
 	// comment
-	alert('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+	console.log("geo error: " + error.message);
+	$("#status").html("geo error: " + error.message);
+	//alert('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
 }
 
 function geo_success(position) {
