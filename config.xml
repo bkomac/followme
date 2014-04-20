@@ -22,10 +22,14 @@
 		<param name="android-package" value="org.apache.cordova.geolocation.GeoBroker" />
 	</feature>
 
+	<feature name="StatusBar">
+		<param name="ios-package" value="CDVStatusBar" onload="true" />
+	</feature>
+
 	<!-- If you do not want any permissions to be added to your app, add the 
 		following tag to your config.xml; you will still have the INTERNET permission 
-		on your app, which PhoneGap requires. 
-	<preference name="permissions" value="none" /> -->
+		on your app, which PhoneGap requires. <preference name="permissions" value="none" 
+		/> -->
 
 	<!-- Customize your app and platform with the preference element. -->
 	<!-- <preference name="phonegap-version" value="3.4.0" /> -->      <!-- all: current version of PhoneGap -->
@@ -56,16 +60,23 @@
 	<!-- Plugins can also be added here. -->
 	<!-- <gap:plugin name="Example" /> A list of available plugins are available 
 		at https://build.phonegap.com/docs/plugins -->
-	<gap:plugin name="org.apache.cordova.geolocation" />	
+	<gap:plugin name="org.apache.cordova.geolocation" />
+	<gap:plugin name="com.phonegap.plugin.statusbar" />
+
+	<gap:config-file platform="ios" parent="UIStatusBarHidden">
+		<true />
+	</gap:config-file>
+
+	<gap:config-file platform="ios"
+		parent="UIViewControllerBasedStatusBarAppearance">
+		<false />
+	</gap:config-file>
 
 	<!-- Define app icon for each platform. -->
 	<icon src="icon.png" />
-	<icon src="res/icon/icon.png" gap:platform="android"
-		gap:density="ldpi" />
-	<icon src="res/icon/icon.png" gap:platform="android"
-		gap:density="mdpi" />
-	<icon src="res/icon/icon.png" gap:platform="android"
-		gap:density="hdpi" />
+	<icon src="res/icon/icon.png" gap:platform="android" gap:density="ldpi" />
+	<icon src="res/icon/icon.png" gap:platform="android" gap:density="mdpi" />
+	<icon src="res/icon/icon.png" gap:platform="android" gap:density="hdpi" />
 	<icon src="res/icon/android/icon.png" gap:platform="android"
 		gap:density="xhdpi" />
 	<icon src="res/icon/blackberry/icon-80.png" gap:platform="blackberry" />
@@ -103,7 +114,8 @@
 		gap:platform="ios" width="768" height="1024" />
 	<gap:splash src="res/screen/ios/screen-ipad-landscape.png"
 		gap:platform="ios" width="1024" height="768" />
-	<gap:splash src="res/screen/ios/splash.png"	gap:platform="ios" width="640" height="1136" />
+	<gap:splash src="res/screen/ios/splash.png" gap:platform="ios"
+		width="640" height="1136" />
 	<gap:splash src="res/screen/windows-phone/screen-portrait.jpg"
 		gap:platform="winphone" />
 
