@@ -4,8 +4,8 @@
 //var remoteAddress = "http://tracksbox.net:18080/followme/ws/";
 // var remoteAddress = "http://cloud.komac.si/ws/";
 //var remoteAddress = "http://doma.komac.si:18080/followme/ws/";
-var remoteAddress = "ws://doma.komac.si:18080/followme/pos";
-//var remoteAddress = "http://tracksbox.net:18080/followme/pos";
+//var remoteAddress = "ws://doma.komac.si:18080/followme/pos";
+var remoteAddress = "http://tracksbox.net:18080/followme/pos";
 
 var wsUri = remoteAddress;
 
