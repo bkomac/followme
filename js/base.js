@@ -1,13 +1,15 @@
 //config
 
 //REST base url
-var remoteAddress = "http://tracksbox.net:18080/followme/ws/";
+//var remoteAddress = "http://tracksbox.net:18080/followme/ws/";
 // var remoteAddress = "http://cloud.komac.si/ws/";
-//var remoteAddress = "http://doma.komac.si:18080/followme/ws/";
+var remoteAddress = "http://doma.komac.si:18080/followme/ws/";
+
+var wsUri = "ws://doma.komac.si:18080/followme/pos";
 
 // security
 var hash = "";
-var SECURITY_KEY = "4cnr374cn874r8743FRE74zri34rnzc4zri34zr43mxr3fhslhaf87448fh48438mfx";
+var websocket = null;
 
 function securityToken(token) {
 	hash = getHmac(token);
@@ -20,6 +22,36 @@ function securityToken(token) {
 // }
 //
 // });
+
+function pushGPS(trackpoint) {
+
+	if (websocket != null && websocket.readyState == 1) {
+		getOptions();
+		var user = getUser();
+
+		console.log("PUSH: " + wsUri + " user:" + user);
+		$("#msg").html("PUSH: " + wsUri + " user:" + user);
+
+		var data = new Trackpoint();
+
+		data.lat = trackpoint.latitude;
+		data.lng = trackpoint.longitude;
+		data.alt = trackpoint.altitude;
+		data.user = user;
+
+		try {
+			console.log("status: " + websocket.readyState);
+			websocket.send(JSON.stringify(data));
+		} catch (e) {
+			console.log("send error ... " + e.message);
+			initWebSockets();
+		}
+	} else {
+		websocket = null;
+		initWebSockets();
+	}
+	data = user = null;
+}
 
 function pingGPS(trackpoint) {
 	getOptions();
@@ -41,7 +73,7 @@ function pingGPS(trackpoint) {
 			altitude : trackpoint.altitude,
 			user : user,
 			speed : trackpoint.speed,
-			accur: trackpoint.accuracy 
+			accur : trackpoint.accuracy
 
 		},
 
@@ -73,8 +105,7 @@ function getHmac(input) {
 	if (input == null)
 		input = "";
 	try {
-		out = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA1(input + "",
-				SECURITY_KEY));
+		out = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA1(input + "", SECURITY_KEY));
 	} catch (e) {
 		console.log("Napaka securitija! input=" + input + " err:" + e.message);
 	}
@@ -129,11 +160,12 @@ $.followme = {
 	followers : 0
 };
 
-var trackpoint = {
-	lat : null,
-	lng : null,
-	alt : null,
-	tst : null,
-	accur : null,
-	speed : null
+var Trackpoint = function() {
+	this.lat = 0;
+	this.lng = 0;
+	this.alt = 0;
+	this.tst = null;
+	this.accur = 0;
+	this.speed = 0;
+	this.user = "";
 };

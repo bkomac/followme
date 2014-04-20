@@ -36,6 +36,11 @@ function documentready() {
 	} catch (e) {
 		// TODO: handle exception
 	}
+
+	if (websocket == null) {
+		initWebSockets();
+	}
+
 }
 
 // on pageCreate *************************************
@@ -62,7 +67,7 @@ $("#prva").on("beforepageshow", function(e) {
 
 });
 
-//prva beforeShow ***************************************
+// prva beforeShow ***************************************
 $("#prva").on("pageshow", function(e) {
 
 	if (isLoging) {
@@ -173,14 +178,15 @@ function getLocation() {
 		console.log("*position: " + JSON.stringify(position));
 		getOptions();
 
-		$("#list").html(
-				"<li style='padding:6px'><a> LAT: " + position.coords.latitude + "<br> LON: "
-						+ position.coords.longitude + "<br> alt: " + position.coords.altitude + "<br> acccur: "
-						+ position.coords.accuracy + "<span class='ui-li-count'>" + $.followme.followers
-						+ "</span></a></li>");
-
 		if (isLoging) {
-			pingGPS(position.coords);
+			// pingGPS(position.coords);
+			pushGPS(position.coords);
+
+			$("#list").html(
+					"<li style='padding:6px'><a> LAT: " + position.coords.latitude + "<br> LON: "
+							+ position.coords.longitude + "<br> alt: " + position.coords.altitude + "<br> acccur: "
+							+ position.coords.accuracy + "<span id='follows' class='ui-li-count'>"
+							+ $.followme.followers + "</span></a></li>");
 
 			$("#msg").append(" - frequency: " + $.followme.options.pushInterval);
 		}
@@ -297,4 +303,36 @@ function detectBrowser() {
 	} else {
 		mapdiv.style.height = '500px';
 	}
+}
+
+function initWebSockets() {
+	console.log("initWebSockets ...");
+
+	// Open a WebSocket connection.
+	websocket = new WebSocket(wsUri);
+
+	// Connected to server
+	websocket.onopen = function(ev) {
+		console.log('ws:// Connected to server: ' + wsUri);
+	};
+
+	// Connection close
+	websocket.onclose = function(ev) {
+		console.log('ws:// Disconnected fom: ' + wsUri);
+	};
+
+	// Message Receved
+	websocket.onmessage = function(ev) {
+		console.log('ws:// Message ' + ev.data);
+		$("#status").html('ws:// Message: ' + ev.data);
+		$("#followers").val(ev.data.follows);
+		$.followme.followers = ev.data.follows;
+	};
+
+	// Error
+	websocket.onerror = function(ev) {
+		console.log('ws:// Error ' + ev.data);
+		$("#status").html('ws:// Error: ' + ev.data);
+	};
+
 }
