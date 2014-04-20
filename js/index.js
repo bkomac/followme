@@ -22,6 +22,8 @@ var timer = null;
 
 var poly = null;
 
+var followers = 0;
+
 // jQuery document ready
 function documentready() {
 	console.log("deviceready...");
@@ -33,6 +35,7 @@ function documentready() {
 			$("#myPanel").panel("open");
 		}, false);
 
+		clearInterval(timer);
 	} catch (e) {
 		// TODO: handle exception
 	}
@@ -117,6 +120,8 @@ $("#options_page").on("pageshow", function(e) {
 			saveOptions($.followme.options);
 		});
 
+		$("#followers").val(followers);
+
 	} catch (e) {
 		console.log("exception: " + e.message);
 	}
@@ -147,7 +152,7 @@ $("#startBtn").on("click", function(e) {
 
 	isLoging = true;
 	$("#msg").html("Start logging ...");
-	$("#status").html("Logging ON");
+	$("#status").html("Logging is ON");
 
 	if (timer !== null)
 		return;
@@ -165,7 +170,7 @@ $("#stopBtn").on("click", function(e) {
 
 	isLoging = false;
 	$("#msg").html("Stoped");
-	$("#status").html("Logging OFF");
+	$("#status").html("Logging is OFF");
 	navigator.geolocation.clearWatch(watchID);
 	$("#startBtn").show();
 	$("#stopBtn").hide();
@@ -185,8 +190,8 @@ function getLocation() {
 			$("#list").html(
 					"<li style='padding:6px'><a> LAT: " + position.coords.latitude + "<br> LON: "
 							+ position.coords.longitude + "<br> alt: " + position.coords.altitude + "<br> acccur: "
-							+ position.coords.accuracy + "<span id='follows' class='ui-li-count'>"
-							+ $.followme.followers + "</span></a></li>");
+							+ position.coords.accuracy + "<span id='follows' class='ui-li-count' title='Followers'>" + followers
+							+ "</span></a></li>");
 
 			$("#msg").append(" - frequency: " + $.followme.options.pushInterval);
 		}
@@ -309,7 +314,7 @@ function initWebSockets() {
 	console.log("initWebSockets ...");
 
 	// Open a WebSocket connection.
-	websocket = new WebSocket(wsUri);
+	websocket = new WebSocket(wsUri + "?gap");
 
 	// Connected to server
 	websocket.onopen = function(ev) {
@@ -324,9 +329,12 @@ function initWebSockets() {
 	// Message Receved
 	websocket.onmessage = function(ev) {
 		console.log('ws:// Message ' + ev.data);
-		$("#status").html('ws:// Message: ' + ev.data);
-		$("#followers").val(ev.data.follows);
-		$.followme.followers = ev.data.follows;
+		//$("#status").html('ws:// Message: ' + ev.data);
+
+		var ff = JSON.parse(ev.data);
+		$("#followers").val(ff.f);
+		followers = ff.f;
+		console.log("foloweres: " + followers);
 	};
 
 	// Error
