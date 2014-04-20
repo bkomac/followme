@@ -2,7 +2,7 @@
 
 <!-- config.xml reference: https://build.phonegap.com/docs/config-xml -->
 <widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0"
-	id="net.tracksbox.followme" version="0.0.5">
+	id="net.tracksbox.followme" version="0.0.6">
 
 	<name>Follow Me</name>
 
@@ -74,9 +74,9 @@
 
 	<!-- Define app icon for each platform. -->
 	<icon src="icon.png" />
-	<icon src="res/icon/icon.png" gap:platform="android" gap:density="ldpi" />
-	<icon src="res/icon/icon.png" gap:platform="android" gap:density="mdpi" />
-	<icon src="res/icon/icon.png" gap:platform="android" gap:density="hdpi" />
+	<icon src="res/icon/android/icon.png" gap:platform="android" gap:density="ldpi" />
+	<icon src="res/icon/android/icon.png" gap:platform="android" gap:density="mdpi" />
+	<icon src="res/icon/android/icon.png" gap:platform="android" gap:density="hdpi" />
 	<icon src="res/icon/android/icon.png" gap:platform="android"
 		gap:density="xhdpi" />
 	<icon src="res/icon/blackberry/icon-80.png" gap:platform="blackberry" />
