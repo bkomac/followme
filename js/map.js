@@ -28,3 +28,5 @@ $( document ).on( "pageinit", "#map-page", function() {
         });
     }
 });
+
+//google.maps.event.addDomListener(window, 'load', mapInit);

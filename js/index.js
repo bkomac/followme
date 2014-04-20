@@ -22,7 +22,7 @@ var timer = null;
 
 var poly = null;
 
-// jQuery document reddy
+// jQuery document ready
 function documentready() {
 	console.log("deviceready...");
 	try {
@@ -55,9 +55,15 @@ $(document).on("pagecreate", "#prva", function() {
 
 // prva beforeShow ***************************************
 $("#prva").on("beforepageshow", function(e) {
+
 	$("[data-role='footer']").toolbar();
 	$("[data-role='footer'] h4").html("");
 	$("[data-role='footer']").show();
+
+});
+
+//prva beforeShow ***************************************
+$("#prva").on("pageshow", function(e) {
 
 	if (isLoging) {
 		$("#startBtn").hide();
@@ -69,13 +75,14 @@ $("#prva").on("beforepageshow", function(e) {
 });
 
 // prva Show ********************************************
-$("#map_page").on("pageshow", function(e) {
-	detectBrowser();
-	// mapInit();
-});
+// $("#map_page").on("pageshow", function(e) {
+// // detectBrowser();
+// // mapInit();
+// });
 
 // options Show ********************************************
 $("#options_page").on("pageshow", function(e) {
+
 	try {
 		getOptions();
 
@@ -113,8 +120,20 @@ $("#options_page").on("pageshow", function(e) {
 
 $("#exitLnk").on("click", function(e) {
 	console.log("*** exit...");
-	map = timer = poly = null;
-	navigator.app.exitApp();
+	try {
+		$("#user").removeData();
+		$("#pushInterval").removeData();
+		$("#endpointInput").removeData();
+		$("#startBtn").removeData();
+		$("#stopBtn").removeData();
+		$("#myPanel").removeData();
+		clearInterval(timer);
+		map = timer = poly = null;
+		navigator.app.exitApp();
+
+	} catch (e) {
+		console.log("exit error: " + e.message);
+	}
 
 });
 
@@ -178,61 +197,7 @@ function getLocation() {
 	});
 }
 
-$("#startBtnX").on(
-		"click",
-		function(e) {
-			console.log("*** start");
-
-			isLoging = true;
-			$("#msg").html("Start logging ...");
-			$("#status").html("Logging ON");
-
-			// Start tracking the User
-			watchID = navigator.geolocation.watchPosition(
-
-			// Success
-			function(position) {
-				// tracking_data.push(position);
-				console.log("*position: " + JSON.stringify(position));
-				getOptions();
-
-				$("#list").html(
-						"<li> LAT: " + position.coords.latitude + "<br> LON: " + position.coords.longitude
-								+ "<br> alt: " + position.coords.altitude + "<br> acccur: " + position.coords.accuracy
-								+ "</li>");
-
-				if (isLoging) {
-					pingGPS(position.coords);
-
-					$("#msg").append(" - frequency: " + $.followme.options.pushInterval);
-				}
-
-			},
-
-			// Error
-			function(error) {
-				console.log(error);
-				$("#msg").html(error);
-			},
-
-			// Settings
-			{
-				frequency : ($.followme.options.pushInterval * 1000),
-				enableHighAccuracy : false,
-				maximumAge : 5000,
-				timeout : 5000
-			});
-
-		});
-
-$("#stopBtnX").on("click", function(e) {
-	console.log("*** stop");
-	isLoging = false;
-	$("#msg").html("Stoped");
-	$("#status").html("Logging OFF");
-	navigator.geolocation.clearWatch(watchID);
-
-}); // *****************************
+// *****************************
 
 function mapInit() {
 	console.log("init map...");
@@ -259,7 +224,7 @@ function geo_error(error) {
 	// comment
 	console.log("geo error: " + error.message);
 	$("#status").html("geo error: " + error.message);
-	//alert('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+	// alert('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
 }
 
 function geo_success(position) {
@@ -333,5 +298,3 @@ function detectBrowser() {
 		mapdiv.style.height = '500px';
 	}
 }
-
-google.maps.event.addDomListener(window, 'load', mapInit);
