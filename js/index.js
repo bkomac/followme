@@ -156,8 +156,32 @@ $("#startBtn").on("click", function(e) {
 
 	if (timer !== null)
 		return;
+
+	var positionToPush = null;
+	var found = false;
+	// geting gps position
+	$("#status").html("Searching for setalites...");
+	watchID = navigator.geolocation.watchPosition(function(position) {
+		if(!found){
+			$("#status").html("Position found.");
+			console.log("Position found.");
+			found = true;
+		}
+		positionToPush = position;
+
+	}, function(error) {
+		console.log(error);
+		$("#status").html("Error finding position. " + error.message + ".");
+	}, {
+		frequency : 3000,
+		enableHighAccuracy : true,
+		maximumAge : 1000,
+		timeout : 15000
+	});
+
 	timer = setInterval(function() {
-		getLocation();
+		$("#status").html("Logging is ON");
+		getLocation(positionToPush);
 	}, ($.followme.options.pushInterval * 1000));
 	$("#startBtn").hide();
 	$("#stopBtn").show();
@@ -176,36 +200,38 @@ $("#stopBtn").on("click", function(e) {
 	$("#stopBtn").hide();
 });
 
-function getLocation() {
+function getLocation(position) {
 	console.log("Get location ...");
-	watchID = navigator.geolocation.getCurrentPosition(function(position) {
+	// watchID = navigator.geolocation.getCurrentPosition(function(position) {
 
-		console.log("*position: " + JSON.stringify(position));
-		getOptions();
+	console.log("*position: " + JSON.stringify(position));
+	getOptions();
 
-		if (isLoging) {
-			// pingGPS(position.coords);
-			pushGPS(position.coords);
+	if (isLoging && position != null) {
+		// pingGPS(position.coords);
+		pushGPS(position);
 
-			$("#list").html(
-					"<li style='padding:6px'><a> LAT: " + position.coords.latitude + "<br> LON: "
-							+ position.coords.longitude + "<br> alt: " + position.coords.altitude + "<br> acccur: "
-							+ position.coords.accuracy + "<span id='follows' class='ui-li-count' title='Followers'>" + followers
-							+ "</span></a></li>");
+		$("#list").html(
+				"<li style='padding:6px'><a> LAT: " + position.coords.latitude + "<br> LON: "
+						+ position.coords.longitude + "<br> Altitude: " + round(position.coords.altitude) + " m ("
+						+ round(position.coords.altitudeAccuracy) + " m) <br> Acccuracy: " + position.coords.accuracy+
+						" m<br/>Speed: "+convert(position.coords.speed)
+						+ "km/h <span id='follows' class='ui-li-count' title='Followers'>" + followers + "</span></a></li>");
 
-			$("#msg").append(" - frequency: " + $.followme.options.pushInterval);
-		}
-
-	}, function(error) {
-		console.log(error);
-		$("#msg").html(error);
-	}, // Settings
-	{
-		frequency : ($.followme.options.pushInterval * 1000),
-		enableHighAccuracy : true,
-		maximumAge : 5000,
-		timeout : 5000
-	});
+		$("#msg").append(" - frequency: " + $.followme.options.pushInterval);
+	}
+	//
+	// }, function(error) {
+	// console.log(error);
+	// $("#msg").html(error);
+	// $("#status").html("Error finding position. " + error.message + ".");
+	// }, // Settings
+	// {
+	// frequency : ($.followme.options.pushInterval * 1000),
+	// enableHighAccuracy : true,
+	// maximumAge : 5000,
+	// timeout : 5000
+	// });
 }
 
 // *****************************
@@ -314,22 +340,22 @@ function initWebSockets() {
 	console.log("initWebSockets ...");
 
 	// Open a WebSocket connection.
-	websocket = new WebSocket(wsUri + "?gap");
+	websocket = new WebSocket(remoteAddress + "?gap");
 
 	// Connected to server
 	websocket.onopen = function(ev) {
-		console.log('ws:// Connected to server: ' + wsUri);
+		console.log('ws:// Connected to server: ' + remoteAddress);
 	};
 
 	// Connection close
 	websocket.onclose = function(ev) {
-		console.log('ws:// Disconnected fom: ' + wsUri);
+		console.log('ws:// Disconnected fom: ' + remoteAddress);
 	};
 
 	// Message Receved
 	websocket.onmessage = function(ev) {
 		console.log('ws:// Message ' + ev.data);
-		//$("#status").html('ws:// Message: ' + ev.data);
+		// $("#status").html('ws:// Message: ' + ev.data);
 
 		var ff = JSON.parse(ev.data);
 		$("#followers").val(ff.f);

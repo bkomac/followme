@@ -7,8 +7,6 @@
 //var remoteAddress = "ws://doma.komac.si:18080/followme/pos";
 var remoteAddress = "ws://tracksbox.net:18080/followme/pos";
 
-var wsUri = remoteAddress;
-
 // security
 var hash = "";
 var websocket = null;
@@ -25,14 +23,16 @@ function securityToken(token) {
 //
 // });
 
-function pushGPS(trackpoint) {
+function pushGPS(position) {
 
 	if (websocket != null && websocket.readyState == 1) {
 		getOptions();
 		var user = getUser();
+		
+		var trackpoint = position.coords; 
 
-		console.log("PUSH: " + wsUri + " user:" + user);
-		$("#msg").html("PUSH: " + wsUri + " user:" + user);
+		console.log("PUSH: " + remoteAddress + " user:" + user);
+		$("#msg").html("PUSH: " + remoteAddress + "<br/>user: " + user + "<br/>tst: "+position.timestamp);
 
 		var data = new Trackpoint();
 
@@ -97,8 +97,10 @@ function saveOptions(options) {
 }
 
 function getOptions() {
-	if (localStorage.getItem("options") != null)
+	if (localStorage.getItem("options") != null) {
 		$.followme.options = JSON.parse(localStorage.getItem("options"));
+		remoteAddress = $.followme.options.remoteUrl;
+	}
 	return $.followme.options;
 }
 
@@ -171,3 +173,19 @@ var Trackpoint = function() {
 	this.speed = 0;
 	this.user = "";
 };
+
+function convert(ms){
+	if(ms!=null){
+		var kh = ms * 3.6;
+		kh = Math.round(kh * 10) / 10;
+		return kh;
+	}
+	return "";
+	
+}
+
+function round(alt){
+	if(alt == null)
+		return "";
+	return  Math.round(alt * 10) / 10;
+}
