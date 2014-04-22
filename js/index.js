@@ -30,6 +30,7 @@ function documentready() {
 	try {
 
 		navigator.splashscreen.hide();
+		StatusBar.overlaysWebView(false);
 
 		document.addEventListener("menubutton", function() {
 			$("#myPanel").panel("open");
@@ -218,7 +219,7 @@ function getLocation(position) {
 						" m<br/>Speed: "+convert(position.coords.speed)
 						+ "km/h <span id='follows' class='ui-li-count' title='Followers'>" + followers + "</span></a></li>");
 
-		$("#msg").append(" - frequency: " + $.followme.options.pushInterval);
+		
 	}
 	//
 	// }, function(error) {
@@ -336,37 +337,4 @@ function detectBrowser() {
 	}
 }
 
-function initWebSockets() {
-	console.log("initWebSockets ...");
 
-	// Open a WebSocket connection.
-	websocket = new WebSocket(remoteAddress + "?gap");
-
-	// Connected to server
-	websocket.onopen = function(ev) {
-		console.log('ws:// Connected to server: ' + remoteAddress);
-	};
-
-	// Connection close
-	websocket.onclose = function(ev) {
-		console.log('ws:// Disconnected fom: ' + remoteAddress);
-	};
-
-	// Message Receved
-	websocket.onmessage = function(ev) {
-		console.log('ws:// Message ' + ev.data);
-		// $("#status").html('ws:// Message: ' + ev.data);
-
-		var ff = JSON.parse(ev.data);
-		$("#followers").val(ff.f);
-		followers = ff.f;
-		console.log("foloweres: " + followers);
-	};
-
-	// Error
-	websocket.onerror = function(ev) {
-		console.log('ws:// Error ' + ev.data);
-		$("#status").html('ws:// Error: ' + ev.data);
-	};
-
-}

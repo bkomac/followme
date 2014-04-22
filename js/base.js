@@ -24,15 +24,17 @@ function securityToken(token) {
 // });
 
 function pushGPS(position) {
-
+	
 	if (websocket != null && websocket.readyState == 1) {
 		getOptions();
 		var user = getUser();
-		
-		var trackpoint = position.coords; 
+
+		var trackpoint = position.coords;
 
 		console.log("PUSH: " + remoteAddress + " user:" + user);
-		$("#msg").html("PUSH: " + remoteAddress + "<br/>user: " + user + "<br/>tst: "+position.timestamp);
+		$("#msg").html(
+				"PUSH: " + remoteAddress + "<br/>user: " + user + "<br/>tst: " + position.timestamp
+						+ "<br/>Update frequency: " + $.followme.options.pushInterval + " s");
 
 		var data = new Trackpoint();
 
@@ -52,6 +54,7 @@ function pushGPS(position) {
 		websocket = null;
 		initWebSockets();
 	}
+
 	data = user = null;
 }
 
@@ -174,18 +177,54 @@ var Trackpoint = function() {
 	this.user = "";
 };
 
-function convert(ms){
-	if(ms!=null){
+function convert(ms) {
+	if (ms != null) {
 		var kh = ms * 3.6;
 		kh = Math.round(kh * 10) / 10;
 		return kh;
 	}
 	return "";
-	
+
 }
 
-function round(alt){
-	if(alt == null)
+function round(alt) {
+	if (alt == null)
 		return "";
-	return  Math.round(alt * 10) / 10;
+	return Math.round(alt * 10) / 10;
+}
+
+function initWebSockets() {
+	console.log("initWebSockets ...");
+
+	// Open a WebSocket connection.
+	websocket = new WebSocket(remoteAddress + "?gap");
+
+	// Connected to server
+	websocket.onopen = function(ev) {
+		console.log('ws:// Connected to server: ' + remoteAddress);
+	};
+
+	// Connection close
+	websocket.onclose = function(ev) {
+		console.log('ws:// Disconnected fom: ' + remoteAddress);
+	};
+
+	// Message Receved
+	websocket.onmessage = function(ev) {
+		console.log('ws:// Message ' + ev.data);
+		// $("#status").html('ws:// Message: ' + ev.data);
+
+		var ff = JSON.parse(ev.data);
+		$("#followers").val(ff.f);
+		followers = ff.f;
+		console.log("foloweres: " + followers);
+	};
+
+	// Error
+	websocket.onerror = function(ev) {
+		console.log('ws:// Error ' + ev.data);
+		$("#status").html('Error connecting to websocket.');
+		$("#msg").html('Error connecting to websocket. Check your internet connection.');
+	};
+
 }
