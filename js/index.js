@@ -155,10 +155,14 @@ $("#startBtn").on("click", function(e) {
 	$("#msg").html("Start logging ...");
 	$("#status").html("Logging is ON");
 
-	socket.on('position', function(data) {
+	socket.on('position', function(rdata) {
+		var data = JSON.parse(rdata);
 		console.log("Recieve position: " + data);
 		$('#msg').append('<h4>From server:</h4> <p>' + data + '</p>');
-		panTo(JSON.parse(data));
+		
+		console.log("user="+getUser()+" data.usr="+data.user);
+		if(data != null && data.user != getUser())
+			panTo(data);
 	});
 
 	if (timer !== null)
@@ -324,10 +328,7 @@ function panTo(position) {
 		return;
 	map.panTo(new google.maps.LatLng(position.lat, position.lng));
 
-	var info = ('Latitude: ' + position.lat + '<br>' + 'Longitude: ' + position.lng + '<br>' + 'Altitude: '
-			+ position.alt + '<br>' + 'Accuracy: ' + position.accur + '<br>' + '<br>' + 'Speed: ' + position.speed
-			+ '<br>' + 'Timestamp: ' + new Date(position.tst));
-
+	
 	var point = new google.maps.LatLng(position.lat, position.lng);
 	if (!marker) {
 		// create marker
@@ -338,7 +339,14 @@ function panTo(position) {
 	} else {
 		// move marker to new position
 		marker.setPosition(point);
+		marker = null;
 	}
+	
+	var info = ('User: '+position.user+'<br>Latitude: ' + position.lat + '<br>' + 'Longitude: ' + position.lng + '<br>' + 'Altitude: '
+			+ position.alt + '<br>' + 'Accuracy: ' + position.accur + '<br>' + '<br>' + 'Speed: ' + position.speed
+			+ '<br>' + 'Timestamp: ' + new Date(position.tst));
+
+	
 	if (!infowindow) {
 		infowindow = new google.maps.InfoWindow({
 			content : info
@@ -359,7 +367,7 @@ function panTo(position) {
 			strokeWeight : 2
 		});
 
-		// poly.setMap(map);
+		poly.setMap(map);
 	}
 
 	var path = poly.getPath();
