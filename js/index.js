@@ -157,7 +157,7 @@ $("#startBtn").on("click", function(e) {
 	
 	socket.on('position', function(msg) {
 		console.log("Recieve position: "+msg);
-		$('#msg').append('<p>' + msg + '</p>');
+		$('#msg').append('<h4>From server:</h4> <p>' + msg + '</p>');
 	});
 
 	if (timer !== null)
