@@ -5,7 +5,9 @@
 // var remoteAddress = "http://cloud.komac.si/ws/";
 //var remoteAddress = "http://doma.komac.si:18080/followme/ws/";
 //var remoteAddress = "ws://doma.komac.si:18080/followme/pos";
-var remoteAddress = "ws://tracksbox.net:18080/followme/pos";
+//var remoteAddress = "ws://tracksbox.net:18080/followme/pos";
+
+var remoteAddress = "http://localhost:3000";
 
 // security
 var hash = "";
@@ -25,7 +27,7 @@ function securityToken(token) {
 
 function pushGPS(position) {
 	
-	if (websocket != null && websocket.readyState == 1) {
+	if (socket != null) {
 		getOptions();
 		var user = getUser();
 
@@ -44,15 +46,14 @@ function pushGPS(position) {
 		data.user = user;
 
 		try {
-			console.log("status: " + websocket.readyState);
-			websocket.send(JSON.stringify(data));
+			console.log("sending msg...");
+			socket.emit('position', JSON.stringify(data));
 		} catch (e) {
 			console.log("send error ... " + e.message);
-			initWebSockets();
 		}
 	} else {
-		websocket = null;
-		initWebSockets();
+		console.log("Socket is null");
+		
 	}
 
 	data = user = null;

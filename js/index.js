@@ -1,5 +1,5 @@
 function init() {
-	console.log("inti...");
+	console.log("init...");
 	document.addEventListener("deviceready", deviceready);
 }
 
@@ -24,10 +24,14 @@ var poly = null;
 
 var followers = 0;
 
+var socket;
+
 // jQuery document ready
 function documentready() {
 	console.log("deviceready...");
 	try {
+
+		socket = io(remoteAddress);
 
 		navigator.splashscreen.hide();
 		StatusBar.overlaysWebView(false);
@@ -40,11 +44,6 @@ function documentready() {
 	} catch (e) {
 		// TODO: handle exception
 	}
-
-	if (websocket == null) {
-		initWebSockets();
-	}
-
 }
 
 // on pageCreate *************************************
@@ -81,6 +80,7 @@ $("#prva").on("pageshow", function(e) {
 		$("#startBtn").show();
 		$("#stopBtn").hide();
 	}
+
 });
 
 // prva Show ********************************************
@@ -154,6 +154,11 @@ $("#startBtn").on("click", function(e) {
 	isLoging = true;
 	$("#msg").html("Start logging ...");
 	$("#status").html("Logging is ON");
+	
+	socket.on('position', function(msg) {
+		console.log("Recieve position: "+msg);
+		$('#msg').append('<p>' + msg + '</p>');
+	});
 
 	if (timer !== null)
 		return;
@@ -163,7 +168,7 @@ $("#startBtn").on("click", function(e) {
 	// geting gps position
 	$("#status").html("Searching for setalites...");
 	watchID = navigator.geolocation.watchPosition(function(position) {
-		if(!found){
+		if (!found) {
 			$("#status").html("Position found.");
 			console.log("Position found.");
 			found = true;
@@ -215,11 +220,11 @@ function getLocation(position) {
 		$("#list").html(
 				"<li style='padding:6px'><a> LAT: " + position.coords.latitude + "<br> LON: "
 						+ position.coords.longitude + "<br> Altitude: " + round(position.coords.altitude) + " m ("
-						+ round(position.coords.altitudeAccuracy) + " m) <br> Acccuracy: " + position.coords.accuracy+
-						" m<br/>Speed: "+convert(position.coords.speed)
-						+ "km/h <span id='follows' class='ui-li-count' title='Followers'>" + followers + "</span></a></li>");
+						+ round(position.coords.altitudeAccuracy) + " m) <br> Acccuracy: " + position.coords.accuracy
+						+ " m<br/>Speed: " + convert(position.coords.speed)
+						+ "km/h <span id='follows' class='ui-li-count' title='Followers'>" + followers
+						+ "</span></a></li>");
 
-		
 	}
 	//
 	// }, function(error) {
@@ -336,5 +341,3 @@ function detectBrowser() {
 		mapdiv.style.height = '500px';
 	}
 }
-
-
