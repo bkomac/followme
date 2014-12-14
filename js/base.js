@@ -7,7 +7,8 @@
 //var remoteAddress = "ws://doma.komac.si:18080/followme/pos";
 //var remoteAddress = "ws://tracksbox.net:18080/followme/pos";
 
-var remoteAddress = "http://localhost:3000";
+//var remoteAddress = "http://localhost:4000";
+var remoteAddress = "http://doma.komac.si:4000";
 
 // security
 var hash = "";
