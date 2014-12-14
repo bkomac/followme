@@ -83,11 +83,11 @@ $("#prva").on("pageshow", function(e) {
 
 });
 
-// prva Show ********************************************
-// $("#map_page").on("pageshow", function(e) {
-// // detectBrowser();
-// // mapInit();
-// });
+// map Show ********************************************
+$("#map_page").on("pageshow", function(e) {
+	detectBrowser();
+	mapInit();
+});
 
 // options Show ********************************************
 $("#options_page").on("pageshow", function(e) {
@@ -154,9 +154,9 @@ $("#startBtn").on("click", function(e) {
 	isLoging = true;
 	$("#msg").html("Start logging ...");
 	$("#status").html("Logging is ON");
-	
+
 	socket.on('position', function(msg) {
-		console.log("Recieve position: "+msg);
+		console.log("Recieve position: " + msg);
 		$('#msg').append('<h4>From server:</h4> <p>' + msg + '</p>');
 	});
 
