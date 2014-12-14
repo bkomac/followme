@@ -155,9 +155,10 @@ $("#startBtn").on("click", function(e) {
 	$("#msg").html("Start logging ...");
 	$("#status").html("Logging is ON");
 
-	socket.on('position', function(msg) {
-		console.log("Recieve position: " + msg);
-		$('#msg').append('<h4>From server:</h4> <p>' + msg + '</p>');
+	socket.on('position', function(data) {
+		console.log("Recieve position: " + data);
+		$('#msg').append('<h4>From server:</h4> <p>' + data + '</p>');
+		panTo(JSON.parse(data));
 	});
 
 	if (timer !== null)
@@ -251,15 +252,15 @@ function mapInit() {
 	};
 	map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
-	google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
-		watchID = navigator.geolocation.watchPosition(geo_success, geo_error, {
-			maximumAge : 5000,
-			timeout : 5000,
-			enableHighAccuracy : false,
-			frequency : 3000
-		});
-
-	});
+//	google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
+//		watchID = navigator.geolocation.watchPosition(geo_success, geo_error, {
+//			maximumAge : 5000,
+//			timeout : 5000,
+//			enableHighAccuracy : false,
+//			frequency : 3000
+//		});
+//
+//	});
 
 }
 
@@ -280,6 +281,54 @@ function geo_success(position) {
 			+ '<br>' + 'Speed: ' + position.coords.speed + '<br>' + 'Timestamp: ' + new Date(position.timestamp));
 
 	var point = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+	if (!marker) {
+		// create marker
+		marker = new google.maps.Marker({
+			position : point,
+			map : map
+		});
+	} else {
+		// move marker to new position
+		marker.setPosition(point);
+	}
+	if (!infowindow) {
+		infowindow = new google.maps.InfoWindow({
+			content : info
+		});
+	} else {
+		infowindow.setContent(info);
+	}
+
+	google.maps.event.addListener(marker, 'click', function() {
+		infowindow.open(map, marker);
+	});
+
+	if (poly == null) {
+		poly = new google.maps.Polyline({
+			geodesic : true,
+			strokeColor : '#FF0000',
+			strokeOpacity : 1.0,
+			strokeWeight : 2
+		});
+
+		// poly.setMap(map);
+	}
+
+	var path = poly.getPath();
+	path.push(position.coords);
+}
+
+function panTo(position) {
+	console.log("Racifeve: lat=" + position.lat + " lng=" + position.lng);
+	if (map == undefined)
+		return;
+	map.panTo(new google.maps.LatLng(position.lat, position.lng));
+
+	var info = ('Latitude: ' + position.lat + '<br>' + 'Longitude: ' + position.lng + '<br>' + 'Altitude: '
+			+ position.alt + '<br>' + 'Accuracy: ' + position.accur + '<br>' + '<br>' + 'Speed: ' + position.speed
+			+ '<br>' + 'Timestamp: ' + new Date(position.tst));
+
+	var point = new google.maps.LatLng(position.lat, position.lng);
 	if (!marker) {
 		// create marker
 		marker = new google.maps.Marker({
