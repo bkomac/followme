@@ -158,7 +158,7 @@ $("#startBtn").on("click", function(e) {
 	socket.on('position', function(rdata) {
 		var data = JSON.parse(rdata);
 		console.log("Recieve position: " + data);
-		$('#msg').append('<h4>From server:</h4> <p>' + data + '</p>');
+		$('#msg').append('<h4>From server:</h4> <p>' + rdata + '</p>');
 		
 		console.log("user="+getUser()+" data.usr="+data.user);
 		if(data != null && data.user != getUser())
