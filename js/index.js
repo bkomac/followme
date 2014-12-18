@@ -14,7 +14,7 @@ $(document).ready(function() {
 });
 
 var map;
-var marker;
+var marker = null;
 var infowindow;
 var watchID;
 var isLoging = false;
@@ -55,12 +55,11 @@ $(document).on("pagecreate", "#prva", function() {
 		}
 
 	});
-	
-	
+
 	document.addEventListener("menubutton", function() {
 		$("#myPanel").panel("open");
 	}, false);
-	
+
 });// *******************************
 
 // prva beforeShow ***************************************
@@ -88,7 +87,7 @@ $("#prva").on("pageshow", function(e) {
 // map Show ********************************************
 $("#map_page").on("pageshow", function(e) {
 	detectBrowser();
-	mapInit();
+	map = mapInit();
 });
 
 // options Show ********************************************
@@ -158,10 +157,11 @@ $("#startBtn").on("click", function(e) {
 	isLoging = true;
 	$("#msg").html("Start logging ...");
 	$("#status").html("Logging is ON");
+	$("#status").addClass("red");
 
 	socket.on('get_position', function(rdata) {
 		var data = JSON.parse(rdata);
-		console.log("Recieve position: " + data);
+		console.log("Recieve position: " + rdata);
 		$('#msg').html('<p><b>' + data.user + '</b> emits ...</p>');
 
 		console.log("user=" + getUser() + " data.usr=" + data.user);
@@ -198,13 +198,14 @@ $("#startBtn").on("click", function(e) {
 		$("#status").html("Logging is ON");
 		getLocation(positionToPush);
 	}, ($.followme.options.pushInterval * 1000));
-	
+
 	$("#startBtn").hide();
 	$("#stopBtn").show();
 });
 
 $("#stopBtn").on("click", function(e) {
 	console.log("*** stop");
+	$("#status").removeClass("red");
 	clearInterval(timer);
 	timer = null;
 
@@ -331,11 +332,11 @@ function panTo(position) {
 	console.log("Racifeve: lat=" + position.lat + " lng=" + position.lng);
 	if (map == undefined)
 		mapInit();
-	
+
 	map.panTo(new google.maps.LatLng(position.lat, position.lng));
 
 	var point = new google.maps.LatLng(position.lat, position.lng);
-	if (marker== undefined) {
+	if (marker == null) {
 		// create marker
 		marker = new google.maps.Marker({
 			position : point,
@@ -344,10 +345,10 @@ function panTo(position) {
 	} else {
 		// move marker to new position
 		marker.setPosition(point);
-		//marker = null;
+		// marker = null;
 	}
 
-	//map.addOverlay(marker);
+	// map.addOverlay(marker);
 
 	var info = ('User: ' + position.user + '<br>Latitude: ' + position.lat + '<br>' + 'Longitude: ' + position.lng
 			+ '<br>' + 'Altitude: ' + position.alt + '<br>' + 'Accuracy: ' + position.accur + '<br>' + '<br>'

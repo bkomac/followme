@@ -52,11 +52,23 @@ html,body,#map-page,#map-canvas {
 }
 
 @media screen and (max-width: 480px) {
-	.main { width:70%; }
-	.sidebar { width:30%; }
+	.main {
+		width: 70%;
+	}
+	.sidebar {
+		width: 30%;
+	}
 
 	/* You can also tweak any other styles in a breakpoint */
-	H1 { color: blue; font-size:1.2em }
-	
+	H1 {
+		color: blue;
+		font-size: 1.2em
+	}
 }
+
+.red {
+	margin: 0px;
+	background-color: red;
+	color: #fff;
+	text-shadow: none;
 }
