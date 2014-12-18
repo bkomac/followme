@@ -9,7 +9,7 @@
 
 //var remoteAddress = "http://localhost:4000";
 var remoteAddress = "http://doma.komac.si";
-var VERSION = "0.1.2";
+var VERSION = "0.1.3";
 
 // security
 var hash = "";
@@ -49,7 +49,7 @@ function pushGPS(position) {
 
 		try {
 			console.log("sending msg...");
-			socket.emit('position', JSON.stringify(data));
+			socket.emit('put_position', JSON.stringify(data));
 		} catch (e) {
 			console.log("send error ... " + e.message);
 		}

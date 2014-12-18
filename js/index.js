@@ -37,10 +37,6 @@ function documentready() {
 		navigator.splashscreen.hide();
 		StatusBar.overlaysWebView(false);
 
-		document.addEventListener("menubutton", function() {
-			$("#myPanel").panel("open");
-		}, false);
-
 		clearInterval(timer);
 	} catch (e) {
 		// TODO: handle exception
@@ -59,7 +55,12 @@ $(document).on("pagecreate", "#prva", function() {
 		}
 
 	});
-
+	
+	
+	document.addEventListener("menubutton", function() {
+		$("#myPanel").panel("open");
+	}, false);
+	
 });// *******************************
 
 // prva beforeShow ***************************************
@@ -153,12 +154,12 @@ $("#exitLnk").on("click", function(e) {
 
 $("#startBtn").on("click", function(e) {
 	console.log("*** start");
-	
+
 	isLoging = true;
 	$("#msg").html("Start logging ...");
 	$("#status").html("Logging is ON");
 
-	socket.on('position', function(rdata) {
+	socket.on('get_position', function(rdata) {
 		var data = JSON.parse(rdata);
 		console.log("Recieve position: " + data);
 		$('#msg').html('<p><b>' + data.user + '</b> emits ...</p>');
@@ -197,6 +198,7 @@ $("#startBtn").on("click", function(e) {
 		$("#status").html("Logging is ON");
 		getLocation(positionToPush);
 	}, ($.followme.options.pushInterval * 1000));
+	
 	$("#startBtn").hide();
 	$("#stopBtn").show();
 });
@@ -268,7 +270,7 @@ function mapInit() {
 	// });
 	//
 	// });
-
+	return map;
 }
 
 function geo_error(error) {
@@ -328,11 +330,12 @@ function geo_success(position) {
 function panTo(position) {
 	console.log("Racifeve: lat=" + position.lat + " lng=" + position.lng);
 	if (map == undefined)
-		return;
+		mapInit();
+	
 	map.panTo(new google.maps.LatLng(position.lat, position.lng));
 
 	var point = new google.maps.LatLng(position.lat, position.lng);
-	if (!marker) {
+	if (marker== undefined) {
 		// create marker
 		marker = new google.maps.Marker({
 			position : point,
@@ -341,8 +344,10 @@ function panTo(position) {
 	} else {
 		// move marker to new position
 		marker.setPosition(point);
-		marker = null;
+		//marker = null;
 	}
+
+	//map.addOverlay(marker);
 
 	var info = ('User: ' + position.user + '<br>Latitude: ' + position.lat + '<br>' + 'Longitude: ' + position.lng
 			+ '<br>' + 'Altitude: ' + position.alt + '<br>' + 'Accuracy: ' + position.accur + '<br>' + '<br>'
