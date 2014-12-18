@@ -9,6 +9,7 @@
 
 //var remoteAddress = "http://localhost:4000";
 var remoteAddress = "http://doma.komac.si";
+var VERSION = "0.1.2";
 
 // security
 var hash = "";
@@ -35,9 +36,9 @@ function pushGPS(position) {
 		var trackpoint = position.coords;
 
 		console.log("PUSH: " + remoteAddress + " user:" + user);
-		$("#msg").html(
-				"PUSH: " + remoteAddress + "<br/>user: " + user + "<br/>tst: " + position.timestamp
-						+ "<br/>Update frequency: " + $.followme.options.pushInterval + " s");
+//		$("#msg").html(
+//				"PUSH: " + remoteAddress + "<br/>user: " + user + "<br/>tst: " + position.timestamp
+//						+ "<br/>Update frequency: " + $.followme.options.pushInterval + " s");
 
 		var data = new Trackpoint();
 

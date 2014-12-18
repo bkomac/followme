@@ -31,6 +31,7 @@ function documentready() {
 	console.log("deviceready...");
 	try {
 
+		$("#status").html("version " + VERSION);
 		socket = io(remoteAddress);
 
 		navigator.splashscreen.hide();
@@ -140,6 +141,8 @@ $("#exitLnk").on("click", function(e) {
 		$("#myPanel").removeData();
 		clearInterval(timer);
 		map = timer = poly = null;
+		socket.disconnect();
+		socket = null;
 		navigator.app.exitApp();
 
 	} catch (e) {
@@ -150,7 +153,7 @@ $("#exitLnk").on("click", function(e) {
 
 $("#startBtn").on("click", function(e) {
 	console.log("*** start");
-
+	
 	isLoging = true;
 	$("#msg").html("Start logging ...");
 	$("#status").html("Logging is ON");
@@ -158,10 +161,10 @@ $("#startBtn").on("click", function(e) {
 	socket.on('position', function(rdata) {
 		var data = JSON.parse(rdata);
 		console.log("Recieve position: " + data);
-		$('#msg').append('<h4>From server:</h4> <p>' + rdata + '</p>');
-		
-		console.log("user="+getUser()+" data.usr="+data.user);
-		if(data != null && data.user != getUser())
+		$('#msg').html('<p><b>' + data.user + '</b> emits ...</p>');
+
+		console.log("user=" + getUser() + " data.usr=" + data.user);
+		if (data != null && data.user != getUser())
 			panTo(data);
 	});
 
@@ -256,15 +259,15 @@ function mapInit() {
 	};
 	map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
-//	google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
-//		watchID = navigator.geolocation.watchPosition(geo_success, geo_error, {
-//			maximumAge : 5000,
-//			timeout : 5000,
-//			enableHighAccuracy : false,
-//			frequency : 3000
-//		});
-//
-//	});
+	// google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
+	// watchID = navigator.geolocation.watchPosition(geo_success, geo_error, {
+	// maximumAge : 5000,
+	// timeout : 5000,
+	// enableHighAccuracy : false,
+	// frequency : 3000
+	// });
+	//
+	// });
 
 }
 
@@ -328,7 +331,6 @@ function panTo(position) {
 		return;
 	map.panTo(new google.maps.LatLng(position.lat, position.lng));
 
-	
 	var point = new google.maps.LatLng(position.lat, position.lng);
 	if (!marker) {
 		// create marker
@@ -341,12 +343,11 @@ function panTo(position) {
 		marker.setPosition(point);
 		marker = null;
 	}
-	
-	var info = ('User: '+position.user+'<br>Latitude: ' + position.lat + '<br>' + 'Longitude: ' + position.lng + '<br>' + 'Altitude: '
-			+ position.alt + '<br>' + 'Accuracy: ' + position.accur + '<br>' + '<br>' + 'Speed: ' + position.speed
-			+ '<br>' + 'Timestamp: ' + new Date(position.tst));
 
-	
+	var info = ('User: ' + position.user + '<br>Latitude: ' + position.lat + '<br>' + 'Longitude: ' + position.lng
+			+ '<br>' + 'Altitude: ' + position.alt + '<br>' + 'Accuracy: ' + position.accur + '<br>' + '<br>'
+			+ 'Speed: ' + position.speed + '<br>' + 'Timestamp: ' + new Date(position.tst));
+
 	if (!infowindow) {
 		infowindow = new google.maps.InfoWindow({
 			content : info
