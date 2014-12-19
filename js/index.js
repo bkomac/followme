@@ -15,6 +15,7 @@ $(document).ready(function() {
 
 var map;
 var marker = null;
+var meMarker = null;
 var infowindow;
 var watchID;
 var isLoging = false;
@@ -85,9 +86,14 @@ $("#prva").on("pageshow", function(e) {
 });
 
 // map Show ********************************************
+$(document).on("pageinit", "#map_page", function() {
+	mapInit();
+});
+
 $("#map_page").on("pageshow", function(e) {
-	detectBrowser();
-	map = mapInit();
+	// detectBrowser();
+	// map = mapInit();
+
 });
 
 // options Show ********************************************
@@ -95,30 +101,33 @@ $("#options_page").on("pageshow", function(e) {
 
 	try {
 		getOptions();
+		var endpointInput = $("#endpointInput");
+		endpointInput.val($.followme.options.remoteUrl);
 
-		$("#endpointInput").val($.followme.options.remoteUrl);
-
-		$("#endpointInput").on("keyup blur", function(e) {
-			console.log("keyup #endpointInput: " + $("#endpointInput").val());
-			remoteAddress = $("#endpointInput").val();
-			$.followme.options.remoteUrl = $("#endpointInput").val();
+		endpointInput.on("keyup blur", function(e) {
+			console.log("keyup #endpointInput: " + endpointInput.val());
+			remoteAddress = endpointInput.val();
+			$.followme.options.remoteUrl = endpointInput.val();
 			saveOptions($.followme.options);
 		});
 		var user = getUser();
-		$("#user").val(user);
+		var userInput = $("#user");
+		userInput.val(user);
 
-		$("#user").on("keyup blur", function(e) {
-			console.log("keyup #user: " + $("#user").val());
-			setUser($("#user").val());
+		userInput.on("keyup blur", function(e) {
+			console.log("keyup #user: " + userInput.val());
+			setUser(userInput.val());
 		});
 
+		var pushInterval = $("#pushInterval");
 		if ($.followme.options.pushInterval == null || $.followme.options.pushInterval == 0)
 			$.followme.options.pushInterval = 2;
-		$("#pushInterval").val($.followme.options.pushInterval);
+		pushInterval.val($.followme.options.pushInterval);
+		pushInterval.slider("refresh");
 
-		$("#pushInterval").on("change", function(e) {
-			console.log("change #pushInterval: " + $("#pushInterval").val());
-			$.followme.options.pushInterval = $("#pushInterval").val();
+		pushInterval.on("change", function(e) {
+			console.log("change #pushInterval: " + pushInterval.val());
+			$.followme.options.pushInterval = pushInterval.val();
 			saveOptions($.followme.options);
 		});
 
@@ -223,6 +232,16 @@ function getLocation(position) {
 
 	console.log("*position: " + JSON.stringify(position));
 	getOptions();
+	
+	if (meMarker == null) {
+		meMarker = new google.maps.Marker({
+			position : new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+			icon: Utils.getIcon(getUser(), 3),
+			map : map
+		});
+	} else {
+		meMarker.setPosition(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
+	}
 
 	if (isLoging && position != null) {
 		// pingGPS(position.coords);
@@ -255,77 +274,15 @@ function getLocation(position) {
 
 function mapInit() {
 	console.log("init map...");
-
-	var mapOptions = {
+	
+	var myOptions = {
 		zoom : 12,
-		center : new google.maps.LatLng(46.0675981, 14.411458)
+		center : new google.maps.LatLng(46.0675981, 14.411458),
+		mapTypeId : google.maps.MapTypeId.ROADMAP
 	};
-	map = new google.maps.Map(document.getElementById('map'), mapOptions);
-
-	// google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
-	// watchID = navigator.geolocation.watchPosition(geo_success, geo_error, {
-	// maximumAge : 5000,
-	// timeout : 5000,
-	// enableHighAccuracy : false,
-	// frequency : 3000
-	// });
-	//
-	// });
+	map = new google.maps.Map(document.getElementById("map"), myOptions);
+	
 	return map;
-}
-
-function geo_error(error) {
-	// comment
-	console.log("geo error: " + error.message);
-	$("#status").html("geo error: " + error.message);
-	// alert('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
-}
-
-function geo_success(position) {
-
-	map.panTo(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
-
-	var info = ('Latitude: ' + position.coords.latitude + '<br>' + 'Longitude: ' + position.coords.longitude + '<br>'
-			+ 'Altitude: ' + position.coords.altitude + '<br>' + 'Accuracy: ' + position.coords.accuracy + '<br>'
-			+ 'Altitude Accuracy: ' + position.coords.altitudeAccuracy + '<br>' + 'Heading: ' + position.coords.heading
-			+ '<br>' + 'Speed: ' + position.coords.speed + '<br>' + 'Timestamp: ' + new Date(position.timestamp));
-
-	var point = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-	if (!marker) {
-		// create marker
-		marker = new google.maps.Marker({
-			position : point,
-			map : map
-		});
-	} else {
-		// move marker to new position
-		marker.setPosition(point);
-	}
-	if (!infowindow) {
-		infowindow = new google.maps.InfoWindow({
-			content : info
-		});
-	} else {
-		infowindow.setContent(info);
-	}
-
-	google.maps.event.addListener(marker, 'click', function() {
-		infowindow.open(map, marker);
-	});
-
-	if (poly == null) {
-		poly = new google.maps.Polyline({
-			geodesic : true,
-			strokeColor : '#FF0000',
-			strokeOpacity : 1.0,
-			strokeWeight : 2
-		});
-
-		// poly.setMap(map);
-	}
-
-	var path = poly.getPath();
-	path.push(position.coords);
 }
 
 function panTo(position) {
@@ -337,15 +294,14 @@ function panTo(position) {
 
 	var point = new google.maps.LatLng(position.lat, position.lng);
 	if (marker == null) {
-		// create marker
 		marker = new google.maps.Marker({
 			position : point,
+			icon : Utils.getIcon(position.user),
 			map : map
 		});
+		
 	} else {
-		// move marker to new position
 		marker.setPosition(point);
-		// marker = null;
 	}
 
 	// map.addOverlay(marker);
@@ -381,27 +337,4 @@ function panTo(position) {
 	path.push(position.coords);
 }
 
-function getRealContentHeight() {
-	var header = $.mobile.activePage.find("div[data-role='header']:visible");
-	var footer = $.mobile.activePage.find("div[data-role='footer']:visible");
-	var content = $.mobile.activePage.find("div[data-role='content']:visible:visible");
-	var viewport_height = $(window).height();
 
-	var content_height = viewport_height - header.outerHeight() - footer.outerHeight();
-	if ((content.outerHeight() - header.outerHeight() - footer.outerHeight()) <= viewport_height) {
-		content_height -= (content.outerHeight() - content.height());
-	}
-	return content_height;
-}
-
-function detectBrowser() {
-	var useragent = navigator.userAgent;
-	var mapdiv = document.getElementById("map");
-
-	if (useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1) {
-		mapdiv.style.width = '100%';
-		mapdiv.style.height = getRealContentHeight() + " px";
-	} else {
-		mapdiv.style.height = '500px';
-	}
-}

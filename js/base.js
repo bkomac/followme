@@ -9,7 +9,7 @@
 
 //var remoteAddress = "http://localhost:4000";
 var remoteAddress = "http://doma.komac.si";
-var VERSION = "0.1.3";
+var VERSION = "0.1.4";
 
 // security
 var hash = "";
@@ -19,16 +19,24 @@ function securityToken(token) {
 	hash = getHmac(token);
 }
 
-// preset ajax calls
-// $.ajaxSetup({
-// beforeSend : function(request) {
-// request.setRequestHeader("Authority", hash);
-// }
-//
-// });
+var Utils = {
+	getIcon : function(user, color) {
+		trace("***" + user);
+		color = color || 1;
+		if (user != null && user != "") {
+			return "img/icon/letters_" + color + "/letter_" + user.substring(0, 1) + ".png";
+		}
+
+		return "img/icon/letters_1/letter_x.png";
+	}
+};
+
+function trace(msg) {
+	console.log("TRACE: " + msg);
+}
 
 function pushGPS(position) {
-	
+
 	if (socket != null) {
 		getOptions();
 		var user = getUser();
@@ -36,9 +44,11 @@ function pushGPS(position) {
 		var trackpoint = position.coords;
 
 		console.log("PUSH: " + remoteAddress + " user:" + user);
-//		$("#msg").html(
-//				"PUSH: " + remoteAddress + "<br/>user: " + user + "<br/>tst: " + position.timestamp
-//						+ "<br/>Update frequency: " + $.followme.options.pushInterval + " s");
+		// $("#msg").html(
+		// "PUSH: " + remoteAddress + "<br/>user: " + user + "<br/>tst: " +
+		// position.timestamp
+		// + "<br/>Update frequency: " + $.followme.options.pushInterval + "
+		// s");
 
 		var data = new Trackpoint();
 
@@ -48,6 +58,12 @@ function pushGPS(position) {
 		data.user = user;
 
 		try {
+			data.uddi = device.uuid;
+		} catch (e) {
+			data.uddi = "TEST123";
+		}
+
+		try {
 			console.log("sending msg...");
 			socket.emit('put_position', JSON.stringify(data));
 		} catch (e) {
@@ -55,46 +71,10 @@ function pushGPS(position) {
 		}
 	} else {
 		console.log("Socket is null");
-		
+
 	}
 
 	data = user = null;
-}
-
-function pingGPS(trackpoint) {
-	getOptions();
-	var user = getUser();
-
-	console.log("GET: " + $.followme.options.remoteUrl + " user:" + user);
-	$("#msg").html("GET: " + $.followme.options.remoteUrl + " user:" + user);
-
-	$.ajax({
-		type : "GET",
-		url : $.followme.options.remoteUrl,
-		dataType : "json",
-		jsonp : 'jsoncallback',
-		crossDomain : true,
-		cache : false,
-		data : {
-			lat : trackpoint.latitude,
-			lon : trackpoint.longitude,
-			altitude : trackpoint.altitude,
-			user : user,
-			speed : trackpoint.speed,
-			accur : trackpoint.accuracy
-
-		},
-
-		error : function(xhr, ajaxOptions, thrownError) {
-			console.log("error: " + thrownError);
-		},
-		success : function(data) {
-			console.log("RESPONSE: " + JSON.stringify(data));
-			$("#msg").append(" - RESPONSE: " + JSON.stringify(data));
-			$("#followers").val(data.followers);
-			$.followme.followers = data.followers;
-		}
-	});
 }
 
 function saveOptions(options) {
@@ -178,6 +158,7 @@ var Trackpoint = function() {
 	this.accur = 0;
 	this.speed = 0;
 	this.user = "";
+	this.uddi;
 };
 
 function convert(ms) {

@@ -13,7 +13,7 @@
 <link rel="stylesheet" type="text/css" href="css/lib/jquery.mobile.structure-1.4.2.min.css">
 <link rel="stylesheet" type="text/css" href="css/index.css">
 
-<script type="text/javascript" src="phonegap.js"></script>
+<script type="text/javascript" src="cordova.js"></script>
 <script type="text/javascript"
 	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBSYl1raYuU-YkdJ_OZGDzuhlmHqi1HBzU&sensor=false"></script>
 
@@ -93,10 +93,10 @@
 				</ul>
 			</div>
 		</div>
-		<div data-role="main" class="ui-content">
-			<div id="map" style="height: 400px; margin: 0px; padding: 0px"></div>
+		<div data-role="main" class="ui-content" id="map"></div>
+		<div data-role="footer" data-position="fixed" data-theme="a">
+			<h4 id="status"></h4>
 		</div>
-
 	</div>
 
 	<!-- options -->
@@ -117,16 +117,14 @@
 			<label for="text-basic">User:</label> <input name="text-basic" data-clear-btn="true" id="user" value="" type="text">
 			<label for="text-basic">Endpoint:</label> <input name="text-basic" id="endpointInput" value="" type="url"
 				data-mini="true"> <label for="text-basic">Push interval: (s)</label> <input name="text-basic"
-				id="pushInterval" value="" min="1" max="60" step="1" data-highlight="true" type="range"> <label
+				id="pushInterval" min="1" max="60" step="1" data-highlight="true" type="range"> <label
 				for="followers">Followers:</label> <input disabled="disabled" name="followers" id="followers" value="" type="number">
 
 
 		</div>
-	</div>
-
-
-	<div data-role="footer" data-position="fixed" data-theme="a">
-		<h5 id="status" style="font-size: 1em"></h5>
+		<div data-role="footer" data-position="fixed" data-theme="a">
+			<h5 id="status" style="font-size: 1em"></h5>
+		</div>
 	</div>
 
 
