@@ -9,7 +9,7 @@
 
 //var remoteAddress = "http://localhost:4000";
 var remoteAddress = "http://doma.komac.si";
-var VERSION = "0.1.5";
+var VERSION = "0.1.6";
 
 // security
 var hash = "";

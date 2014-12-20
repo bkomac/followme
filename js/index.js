@@ -276,7 +276,7 @@ function mapInit() {
 	console.log("init map...");
 	
 	var myOptions = {
-		zoom : 12,
+		zoom : 15,
 		center : new google.maps.LatLng(46.0675981, 14.411458),
 		mapTypeId : google.maps.MapTypeId.ROADMAP
 	};
