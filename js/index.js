@@ -14,8 +14,9 @@ $(document).ready(function() {
 });
 
 var map;
-var marker = null;
+var markers = [];
 var meMarker = null;
+var pantToPosition = true;
 var infowindow;
 var watchID;
 var isLoging = false;
@@ -293,15 +294,16 @@ function panTo(position) {
 	map.panTo(new google.maps.LatLng(position.lat, position.lng));
 
 	var point = new google.maps.LatLng(position.lat, position.lng);
-	if (marker == null) {
-		marker = new google.maps.Marker({
+	if (markers[position.user] == null) {
+		var marker = new google.maps.Marker({
 			position : point,
 			icon : Utils.getIcon(position.user),
 			map : map
 		});
+		markers[position.user] = marker;
 		
 	} else {
-		marker.setPosition(point);
+		markers[position.user].setPosition(point);
 	}
 
 	// map.addOverlay(marker);
@@ -318,8 +320,8 @@ function panTo(position) {
 		infowindow.setContent(info);
 	}
 
-	google.maps.event.addListener(marker, 'click', function() {
-		infowindow.open(map, marker);
+	google.maps.event.addListener(markers[position.user], 'click', function() {
+		infowindow.open(map, markers[position.user]);
 	});
 
 	if (poly == null) {
