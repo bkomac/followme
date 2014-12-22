@@ -16,7 +16,7 @@ $(document).ready(function() {
 var map;
 var markers = [];
 var meMarker = null;
-var pantToPosition = true;
+
 var infowindow;
 var watchID;
 var isLoging = false;
@@ -27,12 +27,14 @@ var poly = null;
 var followers = 0;
 
 var socket;
+var app;
 
 // jQuery document ready
 function documentready() {
 	console.log("deviceready...");
 	try {
-
+		app = new OnlineUsers();
+		
 		$("#status").html("version " + VERSION);
 		socket = io(remoteAddress);
 
@@ -140,6 +142,7 @@ $("#options_page").on("pageshow", function(e) {
 
 });
 
+// exit
 $("#exitLnk").on("click", function(e) {
 	console.log("*** exit...");
 	try {
@@ -151,7 +154,8 @@ $("#exitLnk").on("click", function(e) {
 		$("#myPanel").removeData();
 		clearInterval(timer);
 		map = timer = poly = null;
-		socket.disconnect();
+		// socket.emit("disconect");
+		// socket.disconnect();
 		socket = null;
 		navigator.app.exitApp();
 
@@ -161,6 +165,7 @@ $("#exitLnk").on("click", function(e) {
 
 });
 
+// start
 $("#startBtn").on("click", function(e) {
 	console.log("*** start");
 
@@ -170,13 +175,18 @@ $("#startBtn").on("click", function(e) {
 	$("#status").addClass("red");
 
 	socket.on('get_position', function(rdata) {
+
 		var data = JSON.parse(rdata);
+		echo(data, "node");
 		console.log("Recieve position: " + rdata);
 		$('#msg').html('<p><b>' + data.user + '</b> emits ...</p>');
 
 		console.log("user=" + getUser() + " data.usr=" + data.user);
-		if (data != null && data.user != getUser())
+		if (data != null && data.user != getUser()){
+			app.addUser(data);
 			panTo(data);
+		}
+			
 	});
 
 	if (timer !== null)
@@ -213,7 +223,9 @@ $("#startBtn").on("click", function(e) {
 	$("#stopBtn").show();
 });
 
+// stop
 $("#stopBtn").on("click", function(e) {
+	socket.emit("disconect");
 	console.log("*** stop");
 	$("#status").removeClass("red");
 	clearInterval(timer);
@@ -228,16 +240,16 @@ $("#stopBtn").on("click", function(e) {
 });
 
 function getLocation(position) {
-	console.log("Get location ...");
+	// console.log("Get location ...");
 	// watchID = navigator.geolocation.getCurrentPosition(function(position) {
 
-	console.log("*position: " + JSON.stringify(position));
+	// console.log("*position: " + JSON.stringify(position));
 	getOptions();
-	
+
 	if (meMarker == null) {
 		meMarker = new google.maps.Marker({
 			position : new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
-			icon: Utils.getIcon(getUser(), 3),
+			icon : Utils.getIcon(getUser(), 3),
 			map : map
 		});
 	} else {
@@ -275,42 +287,44 @@ function getLocation(position) {
 
 function mapInit() {
 	console.log("init map...");
-	
+
 	var myOptions = {
-		zoom : 15,
+		zoom : 16,
 		center : new google.maps.LatLng(46.0675981, 14.411458),
 		mapTypeId : google.maps.MapTypeId.ROADMAP
 	};
 	map = new google.maps.Map(document.getElementById("map"), myOptions);
-	
+
 	return map;
 }
 
-function panTo(position) {
-	console.log("Racifeve: lat=" + position.lat + " lng=" + position.lng);
+function panTo(data) {
+	// console.log("Racifeve: lat=" + position.lat + " lng=" + position.lng);
 	if (map == undefined)
 		mapInit();
 
-	map.panTo(new google.maps.LatLng(position.lat, position.lng));
+	if (panToPosition)
+		map.panTo(new google.maps.LatLng(data.lat, data.lng));
 
-	var point = new google.maps.LatLng(position.lat, position.lng);
-	if (markers[position.user] == null) {
+	var point = new google.maps.LatLng(data.lat, data.lng);
+	if (app.getMarker(data.uuid) == null) {
 		var marker = new google.maps.Marker({
 			position : point,
-			icon : Utils.getIcon(position.user),
+			icon : Utils.getIcon(data.user),
 			map : map
 		});
-		markers[position.user] = marker;
 		
+		app.setMarker(data.uuid, marker);
+
 	} else {
-		markers[position.user].setPosition(point);
+		app.getMarker(data.uuid).setPosition(point);
 	}
 
 	// map.addOverlay(marker);
 
-	var info = ('User: ' + position.user + '<br>Latitude: ' + position.lat + '<br>' + 'Longitude: ' + position.lng
-			+ '<br>' + 'Altitude: ' + position.alt + '<br>' + 'Accuracy: ' + position.accur + '<br>' + '<br>'
-			+ 'Speed: ' + position.speed + '<br>' + 'Timestamp: ' + new Date(position.tst));
+	var info = ('User: ' + data.user + '<br>Latitude: ' + data.lat + '<br>' + 'Longitude: ' + data.lng
+			+ '<br>' + 'Altitude: ' + data.alt + '<br>' + 'Accuracy: ' + data.accur + '<br>' + '<br>'
+			+ 'Speed: ' + data.speed + '<br>' + 'Timestamp: ' + new Date(data.tst));
 
 	if (!infowindow) {
 		infowindow = new google.maps.InfoWindow({
@@ -320,8 +334,8 @@ function panTo(position) {
 		infowindow.setContent(info);
 	}
 
-	google.maps.event.addListener(markers[position.user], 'click', function() {
-		infowindow.open(map, markers[position.user]);
+	google.maps.event.addListener(markers[data.user], 'click', function() {
+		infowindow.open(map, markers[data.user]);
 	});
 
 	if (poly == null) {
@@ -336,7 +350,5 @@ function panTo(position) {
 	}
 
 	var path = poly.getPath();
-	path.push(position.coords);
+	path.push(data.coords);
 }
-
-

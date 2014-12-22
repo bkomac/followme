@@ -9,15 +9,99 @@
 
 //var remoteAddress = "http://localhost:4000";
 var remoteAddress = "http://doma.komac.si:4000";
-var VERSION = "0.1.6";
+var VERSION = "0.1.8";
 
 // security
 var hash = "";
 var websocket = null;
+var panToPosition = true;
+
+var user = null;
+
+// Users
+function OnlineUsers() {
+	this.users = [];
+	this.device;
+
+	this.addUser = function(data) {
+		trace("Ading user..." + data.socketId);
+		var usr = new User();
+		usr.userName = data.user;
+		usr.socketId = data.socketId;
+		usr.tst = data.tst;
+		usr.uuid = data.uuid;
+
+		this.users[usr.uuid] = usr;
+	};
+
+	this.getMarker = function(uuid) {
+		if (this.users[uuid] != null)
+			return this.users[uuid].marker;
+		return null;
+	};
+
+	this.setMarker = function(uuid, marker) {
+		if (this.users[uuid] != null)
+			this.users[uuid].marker = marker;
+	};
+
+	this.getDevice = function() {
+
+		try {
+			// probamo èe je device definiran, drugaèe vrže exception
+			this.device = device;
+			this.device.isOldAndroid = false;
+			this.device.isLG = false;
+			try {
+				var ver = device.version.replace(/\./g, "");
+				trace("ver:" + ver);
+				var model = device.model + "";
+				if (ver <= 410 && device.platform == 'Android') {
+					this.device.isOldAndroid = true;
+					trace("**This is old device! " + navigator.appName + " model:" + device.model + " ver:"
+							+ device.version);
+				}
+				if (model.substring(0, 2) == "LG") {
+					trace("This is LG ...");
+					// setamo tudi property isOldAndroid na true (backward comp)
+					this.device.isOldAndroid = true;
+					this.device.isLG = true;
+				}
+			} catch (e) {
+				error(e.message);
+			}
+
+		} catch (e) {
+			debug("nastavimo device za development: " + e.message);
+			this.device.uuid = "Debug uuid";
+			this.device.platform = "Chrome";
+			this.device.model = navigator.appName.substring(0, 40) + " " + navigator.appVersion.substring(0, 9);
+			this.device.version = "35.0.1916.153 m";
+			this.device.isLG = false;
+		}
+		try {
+			trace("Device - device.platform:" + this.device.platform + " device.version:" + device.version
+					+ " device.uuid:" + this.device.uuid + " device.model:" + this.device.model
+					+ " navigator.appVersion: " + navigator.appVersion);
+		} catch (e) {
+			error(e.message);
+		}
+		return this.device;
+	};
+
+};
+
+function User() {
+	this.userName = "";
+	this.uuid = null;
+	this.points = [];
+	this.marker = null;
+	this.tst = null;
+};
 
 function securityToken(token) {
 	hash = getHmac(token);
-}
+};
 
 var Utils = {
 	getIcon : function(user, color) {
@@ -33,6 +117,9 @@ var Utils = {
 
 function trace(msg) {
 	console.log("TRACE: " + msg);
+}
+function error(msg) {
+	console.log("ERROR: " + msg);
 }
 
 function pushGPS(position) {
@@ -58,9 +145,9 @@ function pushGPS(position) {
 		data.user = user;
 
 		try {
-			data.uddi = device.uuid;
+			data.uuid = app.getDevice().uuid;
 		} catch (e) {
-			data.uddi = "TEST123";
+			data.uuid = "TEST123";
 		}
 
 		try {
@@ -175,6 +262,12 @@ function round(alt) {
 	if (alt == null)
 		return "";
 	return Math.round(alt * 10) / 10;
+}
+
+function echo(object, prepend) {
+	if (prepend == undefined)
+		prepend = "";
+	trace(prepend + "->" + JSON.stringify(object));
 }
 
 function initWebSockets() {
