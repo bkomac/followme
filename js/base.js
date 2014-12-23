@@ -35,7 +35,7 @@ function OnlineUsers() {
 		var usr = new User();
 		usr.userName = data.user;
 		usr.socketId = data.socketId;
-		usr.tst = data.tst;
+		usr.tst = new Date().getTime();
 		usr.uuid = data.uuid;
 
 		if (this.getUser(data.uuid) == null)
@@ -43,13 +43,20 @@ function OnlineUsers() {
 	};
 
 	this.getUser = function(uuid) {
+		var currentTime = new Date().getTime();
 
 		for (var int = 0; int < this.users.length; int++) {
 			if (this.users[int].uuid == uuid)
 				return this.users[int];
+//			if ((this.users[int].tst + 10000) > currentTime)
+//				this.users[int] = null;
 		}
 		return null;
 
+	};
+
+	this.clearUsers = function() {
+		this.users = new Array();
 	};
 
 	this.getMarker = function(uuid) {

@@ -154,9 +154,10 @@ $("#exitLnk").on("click", function(e) {
 		$("#myPanel").removeData();
 		clearInterval(timer);
 		map = timer = poly = null;
-		// socket.emit("disconect");
-		// socket.disconnect();
+		socket.emit("disconect");
+		socket.disconnect();
 		socket = null;
+		
 		navigator.app.exitApp();
 
 	} catch (e) {
@@ -237,6 +238,8 @@ $("#stopBtn").on("click", function(e) {
 	navigator.geolocation.clearWatch(watchID);
 	$("#startBtn").show();
 	$("#stopBtn").hide();
+	app.clearUsers();	
+	socket.removeListener('get_position');
 });
 
 function getLocation(position) {
