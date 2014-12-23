@@ -2,7 +2,7 @@
 
 <!-- config.xml reference: https://build.phonegap.com/docs/config-xml -->
 <widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0"
-	id="net.tracksbox.followme" version="0.1.8">
+	id="net.tracksbox.followme" version="0.1.9" android-versionCode="94" ios-CFBundleVersion="0.1.8">
 
 	<name>Follow Me</name>
 
@@ -63,6 +63,7 @@
 	<gap:plugin name="org.apache.cordova.geolocation" />
 	<gap:plugin name="org.apache.cordova.network-information" version="0.2.7" />
 	<gap:plugin name="com.phonegap.plugin.statusbar" />
+	<gap:plugin name="org.apache.cordova.device" version="0.2.12" />
 
 	<gap:config-file platform="ios" parent="UIStatusBarHidden">
 		<true />

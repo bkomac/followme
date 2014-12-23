@@ -1,5 +1,5 @@
 function init() {
-	console.log("init...");
+	trace("init...");
 	document.addEventListener("deviceready", deviceready);
 }
 
@@ -31,7 +31,7 @@ var app;
 
 // jQuery document ready
 function documentready() {
-	console.log("deviceready...");
+	trace("deviceready...");
 	try {
 		app = new OnlineUsers();
 		
@@ -43,7 +43,7 @@ function documentready() {
 
 		clearInterval(timer);
 	} catch (e) {
-		// TODO: handle exception
+		error(e.message);
 	}
 }
 
@@ -108,7 +108,7 @@ $("#options_page").on("pageshow", function(e) {
 		endpointInput.val($.followme.options.remoteUrl);
 
 		endpointInput.on("keyup blur", function(e) {
-			console.log("keyup #endpointInput: " + endpointInput.val());
+			trace("keyup #endpointInput: " + endpointInput.val());
 			remoteAddress = endpointInput.val();
 			$.followme.options.remoteUrl = endpointInput.val();
 			saveOptions($.followme.options);
@@ -118,7 +118,7 @@ $("#options_page").on("pageshow", function(e) {
 		userInput.val(user);
 
 		userInput.on("keyup blur", function(e) {
-			console.log("keyup #user: " + userInput.val());
+			trace("keyup #user: " + userInput.val());
 			setUser(userInput.val());
 		});
 
@@ -129,7 +129,7 @@ $("#options_page").on("pageshow", function(e) {
 		pushInterval.slider("refresh");
 
 		pushInterval.on("change", function(e) {
-			console.log("change #pushInterval: " + pushInterval.val());
+			trace("change #pushInterval: " + pushInterval.val());
 			$.followme.options.pushInterval = pushInterval.val();
 			saveOptions($.followme.options);
 		});
@@ -137,14 +137,14 @@ $("#options_page").on("pageshow", function(e) {
 		$("#followers").val(followers);
 
 	} catch (e) {
-		console.log("exception: " + e.message);
+		trace("exception: " + e.message);
 	}
 
 });
 
 // exit
 $("#exitLnk").on("click", function(e) {
-	console.log("*** exit...");
+	trace("*** exit...");
 	try {
 		$("#user").removeData();
 		$("#pushInterval").removeData();
@@ -160,14 +160,14 @@ $("#exitLnk").on("click", function(e) {
 		navigator.app.exitApp();
 
 	} catch (e) {
-		console.log("exit error: " + e.message);
+		trace("exit error: " + e.message);
 	}
 
 });
 
 // start
 $("#startBtn").on("click", function(e) {
-	console.log("*** start");
+	trace("*** start");
 
 	isLoging = true;
 	$("#msg").html("Start logging ...");
@@ -178,10 +178,10 @@ $("#startBtn").on("click", function(e) {
 
 		var data = JSON.parse(rdata);
 		echo(data, "node");
-		console.log("Recieve position: " + rdata);
+		trace("Recieve position: " + rdata);
 		$('#msg').html('<p><b>' + data.user + '</b> emits ...</p>');
 
-		console.log("user=" + getUser() + " data.usr=" + data.user);
+		trace("user=" + getUser() + " data.usr=" + data.user);
 		if (data != null && data.user != getUser()){
 			app.addUser(data);
 			panTo(data);
@@ -199,13 +199,13 @@ $("#startBtn").on("click", function(e) {
 	watchID = navigator.geolocation.watchPosition(function(position) {
 		if (!found) {
 			$("#status").html("Position found.");
-			console.log("Position found.");
+			trace("Position found.");
 			found = true;
 		}
 		positionToPush = position;
 
 	}, function(error) {
-		console.log(error);
+		trace(error);
 		$("#status").html("Error finding position. " + error.message + ".");
 	}, {
 		frequency : 3000,
@@ -226,7 +226,7 @@ $("#startBtn").on("click", function(e) {
 // stop
 $("#stopBtn").on("click", function(e) {
 	socket.emit("disconect");
-	console.log("*** stop");
+	trace("*** stop");
 	$("#status").removeClass("red");
 	clearInterval(timer);
 	timer = null;
@@ -240,10 +240,10 @@ $("#stopBtn").on("click", function(e) {
 });
 
 function getLocation(position) {
-	// console.log("Get location ...");
+	// trace("Get location ...");
 	// watchID = navigator.geolocation.getCurrentPosition(function(position) {
 
-	// console.log("*position: " + JSON.stringify(position));
+	// trace("*position: " + JSON.stringify(position));
 	getOptions();
 
 	if (meMarker == null) {
@@ -271,7 +271,7 @@ function getLocation(position) {
 	}
 	//
 	// }, function(error) {
-	// console.log(error);
+	// trace(error);
 	// $("#msg").html(error);
 	// $("#status").html("Error finding position. " + error.message + ".");
 	// }, // Settings
@@ -286,7 +286,7 @@ function getLocation(position) {
 // *****************************
 
 function mapInit() {
-	console.log("init map...");
+	trace("init map...");
 
 	var myOptions = {
 		zoom : 16,
@@ -299,7 +299,7 @@ function mapInit() {
 }
 
 function panTo(data) {
-	// console.log("Racifeve: lat=" + position.lat + " lng=" + position.lng);
+	// trace("Racifeve: lat=" + position.lat + " lng=" + position.lng);
 	if (map == undefined)
 		mapInit();
 
@@ -307,6 +307,7 @@ function panTo(data) {
 		map.panTo(new google.maps.LatLng(data.lat, data.lng));
 
 	var point = new google.maps.LatLng(data.lat, data.lng);
+	
 	if (app.getMarker(data.uuid) == null) {
 		var marker = new google.maps.Marker({
 			position : point,

@@ -1,15 +1,22 @@
 //config
+var LogLevel = {
+	ALL : 0,
+	TRACE : 1,
+	DEBUG : 2,
+	INFO : 3,
+	WARN : 4,
+	ERROR : 5,
+	FATAL : 6
+};
 
-//REST base url
-//var remoteAddress = "http://tracksbox.net:18080/followme/ws/";
-// var remoteAddress = "http://cloud.komac.si/ws/";
-//var remoteAddress = "http://doma.komac.si:18080/followme/ws/";
-//var remoteAddress = "ws://doma.komac.si:18080/followme/pos";
-//var remoteAddress = "ws://tracksbox.net:18080/followme/pos";
+// adb logcat CordovaLog:* *:S
+// #######################################################
 
-//var remoteAddress = "http://localhost:4000";
-var remoteAddress = "http://doma.komac.si:4000";
-var VERSION = "0.1.8";
+var remoteAddress = "http://ws.komac.si:4000";
+var VERSION = "0.1.9";
+var LOG_LEVEL = LogLevel.ERROR; // TRACE
+
+// #######################################################
 
 // security
 var hash = "";
@@ -20,8 +27,8 @@ var user = null;
 
 // Users
 function OnlineUsers() {
-	this.users = [];
-	this.device;
+	this.users = new Array();
+	this.device = {};
 
 	this.addUser = function(data) {
 		trace("Ading user..." + data.socketId);
@@ -31,18 +38,31 @@ function OnlineUsers() {
 		usr.tst = data.tst;
 		usr.uuid = data.uuid;
 
-		this.users[usr.uuid] = usr;
+		if (this.getUser(data.uuid) == null)
+			this.users.push(usr);
+	};
+
+	this.getUser = function(uuid) {
+
+		for (var int = 0; int < this.users.length; int++) {
+			if (this.users[int].uuid == uuid)
+				return this.users[int];
+		}
+		return null;
+
 	};
 
 	this.getMarker = function(uuid) {
-		if (this.users[uuid] != null)
-			return this.users[uuid].marker;
-		return null;
+		return this.getUser(uuid).marker;
 	};
 
 	this.setMarker = function(uuid, marker) {
-		if (this.users[uuid] != null)
-			this.users[uuid].marker = marker;
+		var usr = this.getUser(uuid);
+		if (usr != null) {
+			echo(this.users[uuid], "user je:");
+
+			usr.marker = marker;
+		}
 	};
 
 	this.getDevice = function() {
@@ -115,13 +135,6 @@ var Utils = {
 	}
 };
 
-function trace(msg) {
-	console.log("TRACE: " + msg);
-}
-function error(msg) {
-	console.log("ERROR: " + msg);
-}
-
 function pushGPS(position) {
 
 	if (socket != null) {
@@ -130,7 +143,7 @@ function pushGPS(position) {
 
 		var trackpoint = position.coords;
 
-		console.log("PUSH: " + remoteAddress + " user:" + user);
+		trace("PUSH: " + remoteAddress + " user:" + user);
 		// $("#msg").html(
 		// "PUSH: " + remoteAddress + "<br/>user: " + user + "<br/>tst: " +
 		// position.timestamp
@@ -144,20 +157,16 @@ function pushGPS(position) {
 		data.alt = trackpoint.altitude;
 		data.user = user;
 
-		try {
-			data.uuid = app.getDevice().uuid;
-		} catch (e) {
-			data.uuid = "TEST123";
-		}
+		data.uuid = app.getDevice().uuid;
 
 		try {
-			console.log("sending msg...");
+			trace("sending msg...");
 			socket.emit('put_position', JSON.stringify(data));
 		} catch (e) {
-			console.log("send error ... " + e.message);
+			trace("send error ... " + e.message);
 		}
 	} else {
-		console.log("Socket is null");
+		trace("Socket is null");
 
 	}
 
@@ -184,7 +193,7 @@ function getHmac(input) {
 	try {
 		out = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA1(input + "", SECURITY_KEY));
 	} catch (e) {
-		console.log("Napaka securitija! input=" + input + " err:" + e.message);
+		trace("Napaka securitija! input=" + input + " err:" + e.message);
 	}
 	return out;
 }
@@ -245,7 +254,7 @@ var Trackpoint = function() {
 	this.accur = 0;
 	this.speed = 0;
 	this.user = "";
-	this.uddi;
+	this.uuid = null;
 };
 
 function convert(ms) {
@@ -270,36 +279,51 @@ function echo(object, prepend) {
 	trace(prepend + "->" + JSON.stringify(object));
 }
 
+function trace(msg) {
+	console.log("TRACE: " + msg);
+};
+function debug(msg) {
+	if (LOG_LEVEL <= LogLevel.DEBUG)
+		console.log("DEBUG: " + msg);
+}
+function warn(msg) {
+	if (LOG_LEVEL <= LogLevel.WARN)
+		console.warn("WARN: " + msg);
+}
+function error(msg) {
+	console.error("***ERROR: " + msg);
+};
+
 function initWebSockets() {
-	console.log("initWebSockets ...");
+	trace("initWebSockets ...");
 
 	// Open a WebSocket connection.
 	websocket = new WebSocket(remoteAddress + "?gap");
 
 	// Connected to server
 	websocket.onopen = function(ev) {
-		console.log('ws:// Connected to server: ' + remoteAddress);
+		trace('ws:// Connected to server: ' + remoteAddress);
 	};
 
 	// Connection close
 	websocket.onclose = function(ev) {
-		console.log('ws:// Disconnected fom: ' + remoteAddress);
+		trace('ws:// Disconnected fom: ' + remoteAddress);
 	};
 
 	// Message Receved
 	websocket.onmessage = function(ev) {
-		console.log('ws:// Message ' + ev.data);
+		trace('ws:// Message ' + ev.data);
 		// $("#status").html('ws:// Message: ' + ev.data);
 
 		var ff = JSON.parse(ev.data);
 		$("#followers").val(ff.f);
 		followers = ff.f;
-		console.log("foloweres: " + followers);
+		trace("foloweres: " + followers);
 	};
 
 	// Error
 	websocket.onerror = function(ev) {
-		console.log('ws:// Error ' + ev.data);
+		trace('ws:// Error ' + ev.data);
 		$("#status").html('Error connecting to websocket.');
 		$("#msg").html('Error connecting to websocket. Check your internet connection.');
 	};
