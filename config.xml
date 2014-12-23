@@ -2,7 +2,7 @@
 
 <!-- config.xml reference: https://build.phonegap.com/docs/config-xml -->
 <widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0"
-	id="net.tracksbox.followme" version="0.1.9" android-versionCode="94" ios-CFBundleVersion="0.1.8">
+	id="net.tracksbox.followme" version="0.1.9" android-versionCode="101" ios-CFBundleVersion="0.1.8">
 
 	<name>Follow Me</name>
 
