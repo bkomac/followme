@@ -113,13 +113,26 @@
 			</div>
 		</div>
 		<div data-role="main" class="ui-content">
-			<label for="text-basic">User:</label> <input name="text-basic" data-clear-btn="true" id="user" value="" type="text">
-			<label for="text-basic">Endpoint:</label> <input name="text-basic" id="endpointInput" value="" type="url" disabled="disabled"
-				data-mini="true"> <label for="text-basic">Push interval: (s)</label> <input name="text-basic"
-				id="pushInterval" min="1" max="60" step="1" data-highlight="true" type="range"> <label
-				for="followers">Followers:</label> <input disabled="disabled" name="followers" id="followers" value="" type="number">
-
-
+			<ul data-role="listview" id="uporabnikList">
+				<li><label for="text-basic">User:</label> <input name="text-basic" data-clear-btn="true" id="user" value=""
+					type="text"></li>
+				<li><label for="text-basic">Endpoint:</label> <input name="text-basic" id="endpointInput" value="" type="url"
+					disabled="disabled" data-mini="true"></li>
+				<li><label for="text-basic">Push interval: (s)</label> <input name="text-basic" id="pushInterval" min="0"
+					max="60" step="1" data-highlight="true" type="range"></li>
+				<li><label for="text-basic">Pan to position: </label> <select class="ui-li-aside" name="slider-flip-m1"
+					id="panMap" data-role="slider" data-mini="true">
+						<option value="false">O</option>
+						<option value="true" selected="selected">I</option>
+				</select></li>
+				<li><label for="text-basic">Show polyline: </label> <select class="ui-li-aside" name="slider-flip-m2"
+					id="showPolyLine" data-role="slider" data-mini="true">
+						<option value="false" selected="selected">O</option>
+						<option value="true">I</option>
+				</select></li>
+				<li><label for="followers">Followers:</label> <input disabled="disabled" name="followers" id="followers"
+					value="" type="number"></li>
+			</ul>
 		</div>
 		<div data-role="footer" data-position="fixed" data-theme="a">
 			<h5 id="status" style="font-size: 1em"></h5>

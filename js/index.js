@@ -22,8 +22,6 @@ var watchID;
 var isLoging = false;
 var timer = null;
 
-var poly = null;
-
 var followers = 0;
 
 var socket;
@@ -34,7 +32,7 @@ function documentready() {
 	trace("deviceready...");
 	try {
 		app = new OnlineUsers();
-		
+
 		$("#status").html("version " + VERSION);
 		socket = io(remoteAddress);
 
@@ -123,8 +121,8 @@ $("#options_page").on("pageshow", function(e) {
 		});
 
 		var pushInterval = $("#pushInterval");
-		if ($.followme.options.pushInterval == null || $.followme.options.pushInterval == 0)
-			$.followme.options.pushInterval = 2;
+		if ($.followme.options.pushInterval == null)
+			$.followme.options.pushInterval = 3;
 		pushInterval.val($.followme.options.pushInterval);
 		pushInterval.slider("refresh");
 
@@ -132,6 +130,24 @@ $("#options_page").on("pageshow", function(e) {
 			trace("change #pushInterval: " + pushInterval.val());
 			$.followme.options.pushInterval = pushInterval.val();
 			saveOptions($.followme.options);
+		});
+
+		// panMap
+		var panMap = $('#panMap');
+		panMap.find('option[value="' + panToPosition + '"]').attr('selected', true);
+		panMap.slider("refresh");
+
+		panMap.change(function() {
+			panToPosition = $(this).find(":selected").val();
+		});
+
+		// show polyLine
+		var showPolyLineUI = $('#showPolyLine');
+		showPolyLineUI.find('option[value="' + showPolyLine + '"]').attr('selected', true);
+		showPolyLineUI.slider("refresh");
+
+		showPolyLineUI.change(function() {
+			showPolyLine = $(this).find(":selected").val();
 		});
 
 		$("#followers").val(followers);
@@ -157,7 +173,7 @@ $("#exitLnk").on("click", function(e) {
 		socket.emit("disconect");
 		socket.disconnect();
 		socket = null;
-		
+
 		navigator.app.exitApp();
 
 	} catch (e) {
@@ -183,11 +199,11 @@ $("#startBtn").on("click", function(e) {
 		$('#msg').html('<p><b>' + data.user + '</b> emits ...</p>');
 
 		trace("user=" + getUser() + " data.usr=" + data.user);
-		if (data != null && data.user != getUser()){
+		if (data != null && data.user != getUser()) {
 			app.addUser(data);
 			panTo(data);
 		}
-			
+
 	});
 
 	if (timer !== null)
@@ -203,13 +219,17 @@ $("#startBtn").on("click", function(e) {
 			trace("Position found.");
 			found = true;
 		}
+
 		positionToPush = position;
+
+		if ($.followme.options.pushInterval == 0)
+			getLocation(positionToPush);
 
 	}, function(error) {
 		trace(error);
 		$("#status").html("Error finding position. " + error.message + ".");
 	}, {
-		frequency : 3000,
+		frequency : 500,
 		enableHighAccuracy : true,
 		maximumAge : 1000,
 		timeout : 15000
@@ -238,8 +258,9 @@ $("#stopBtn").on("click", function(e) {
 	navigator.geolocation.clearWatch(watchID);
 	$("#startBtn").show();
 	$("#stopBtn").hide();
-	app.clearUsers();	
+	app.clearUsers();
 	socket.removeListener('get_position');
+
 });
 
 function getLocation(position) {
@@ -310,25 +331,42 @@ function panTo(data) {
 		map.panTo(new google.maps.LatLng(data.lat, data.lng));
 
 	var point = new google.maps.LatLng(data.lat, data.lng);
-	
+
 	if (app.getMarker(data.uuid) == null) {
 		var marker = new google.maps.Marker({
 			position : point,
 			icon : Utils.getIcon(data.user),
 			map : map
 		});
-		
+
 		app.setMarker(data.uuid, marker);
 
 	} else {
 		app.getMarker(data.uuid).setPosition(point);
 	}
 
-	// map.addOverlay(marker);
+	if (app.getPoly(data.uuid) == null) {
+		var poly = new google.maps.Polyline({
+			geodesic : true,
+			strokeColor : '#FF0000',
+			strokeOpacity : 0.9,
+			strokeWeight : 2
+		});
 
-	var info = ('User: ' + data.user + '<br>Latitude: ' + data.lat + '<br>' + 'Longitude: ' + data.lng
-			+ '<br>' + 'Altitude: ' + data.alt + '<br>' + 'Accuracy: ' + data.accur + '<br>' + '<br>'
-			+ 'Speed: ' + data.speed + '<br>' + 'Timestamp: ' + new Date(data.tst));
+		app.setPoly(data.uuid, poly);
+
+		if (showPolyLine)
+			poly.setMap(map);
+		else
+			poly.setMap(null);
+	}
+
+	var path = app.getPoly(data.uuid).getPath();
+	path.push(point);
+
+	var info = ('User: ' + data.user + '<br>Latitude: ' + data.lat + '<br>' + 'Longitude: ' + data.lng + '<br>'
+			+ 'Altitude: ' + data.alt + '<br>' + 'Accuracy: ' + data.accur + '<br>' + '<br>' + 'Speed: ' + data.speed
+			+ '<br>' + 'Timestamp: ' + new Date(data.tst));
 
 	if (!infowindow) {
 		infowindow = new google.maps.InfoWindow({
@@ -342,17 +380,4 @@ function panTo(data) {
 		infowindow.open(map, markers[data.user]);
 	});
 
-	if (poly == null) {
-		poly = new google.maps.Polyline({
-			geodesic : true,
-			strokeColor : '#FF0000',
-			strokeOpacity : 1.0,
-			strokeWeight : 2
-		});
-
-		poly.setMap(map);
-	}
-
-	var path = poly.getPath();
-	path.push(data.coords);
 }

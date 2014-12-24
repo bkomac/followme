@@ -22,6 +22,7 @@ var LOG_LEVEL = LogLevel.ERROR; // TRACE
 var hash = "";
 var websocket = null;
 var panToPosition = true;
+var showPolyLine = false;
 
 var user = null;
 
@@ -46,16 +47,29 @@ function OnlineUsers() {
 		var currentTime = new Date().getTime();
 
 		for (var int = 0; int < this.users.length; int++) {
-			if (this.users[int].uuid == uuid)
+			trace(this.users[int].userName + "TST:" + this.users[int].tst + " " + currentTime);
+
+			// pucamo stare markerje
+			if ((this.users[int].tst + 15000) < currentTime) {
+				trace("brišem..." + this.users[int].userName);
+				this.users[int].marker.setMap(null);
+				this.users.splice(int, 1);
+				return;
+			}
+
+			if (this.users[int].uuid == uuid) {
+				this.users[int].tst = new Date().getTime();
 				return this.users[int];
-//			if ((this.users[int].tst + 10000) > currentTime)
-//				this.users[int] = null;
-		}
+			}
+
+		}//
 		return null;
 
 	};
 
 	this.clearUsers = function() {
+		this.clearAllMarkers();
+		this.clearAllPolys();
 		this.users = new Array();
 	};
 
@@ -63,12 +77,37 @@ function OnlineUsers() {
 		return this.getUser(uuid).marker;
 	};
 
+	this.clearAllMarkers = function() {
+		for (var int = 0; int < this.users.length; int++) {
+			trace("Clearing markers: " + this.users[int].userName);
+			this.users[int].marker.setMap(null);
+		}
+	};
+
 	this.setMarker = function(uuid, marker) {
 		var usr = this.getUser(uuid);
 		if (usr != null) {
 			echo(this.users[uuid], "user je:");
-
 			usr.marker = marker;
+		}
+	};
+	
+	this.getPoly = function(uuid) {
+		return this.getUser(uuid).poly;
+	};
+	
+	this.setPoly = function(uuid, poly) {
+		var usr = this.getUser(uuid);
+		if (usr != null) {
+			echo(this.users[uuid], "user je:");
+			usr.poly = poly;
+		}
+	};
+	
+	this.clearAllPolys = function() {
+		for (var int = 0; int < this.users.length; int++) {
+			trace("Clearing polys: " + this.users[int].userName);
+			this.users[int].poly.setMap(null);
 		}
 	};
 
@@ -121,7 +160,7 @@ function OnlineUsers() {
 function User() {
 	this.userName = "";
 	this.uuid = null;
-	this.points = [];
+	this.poly = null;
 	this.marker = null;
 	this.tst = null;
 };
