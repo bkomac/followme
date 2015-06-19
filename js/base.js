@@ -13,7 +13,7 @@ var LogLevel = {
 // #######################################################
 
 var remoteAddress = "http://ws.komac.si:4000";
-var VERSION = "0.1.9";
+var VERSION = "1.0.4";
 var LOG_LEVEL = LogLevel.ERROR; // TRACE
 
 // #######################################################
@@ -29,10 +29,28 @@ var user = null;
 // Users
 function OnlineUsers() {
 	this.users = new Array();
-	this.device = {};
+	this.appUser = new User();
+	this.device = null;
+	this.battery = {
+		"level" : 100,
+		"isPlugged" : true
+	};
+
+	this.getAppUser = function() {
+
+		this.appUser.userName = JSON.parse(localStorage.getItem("user"));
+		this.appUser.user = this.appUser.userName;
+		this.getDevice();
+
+		this.appUser.uuid = app.device.uuid;
+
+		trace("UUDI=" + this.appUser.uuid);
+
+		return this.appUser;
+	};
 
 	this.addUser = function(data) {
-		trace("Ading user..." + data.socketId);
+		trace("Adding user..." + data.socketId);
 		var usr = new User();
 		usr.userName = data.user;
 		usr.socketId = data.socketId;
@@ -51,7 +69,7 @@ function OnlineUsers() {
 
 			// pucamo stare markerje
 			if ((this.users[int].tst + 15000) < currentTime) {
-				trace("brišem..." + this.users[int].userName);
+				trace("briÅ¡em..." + this.users[int].userName);
 				this.users[int].marker.setMap(null);
 				this.users.splice(int, 1);
 				return;
@@ -91,11 +109,11 @@ function OnlineUsers() {
 			usr.marker = marker;
 		}
 	};
-	
+
 	this.getPoly = function(uuid) {
 		return this.getUser(uuid).poly;
 	};
-	
+
 	this.setPoly = function(uuid, poly) {
 		var usr = this.getUser(uuid);
 		if (usr != null) {
@@ -103,7 +121,7 @@ function OnlineUsers() {
 			usr.poly = poly;
 		}
 	};
-	
+
 	this.clearAllPolys = function() {
 		for (var int = 0; int < this.users.length; int++) {
 			trace("Clearing polys: " + this.users[int].userName);
@@ -114,7 +132,7 @@ function OnlineUsers() {
 	this.getDevice = function() {
 
 		try {
-			// probamo èe je device definiran, drugaèe vrže exception
+			// probamo Äe je device definiran, drugaÄe vrÅ¾e exception
 			this.device = device;
 			this.device.isOldAndroid = false;
 			this.device.isLG = false;
@@ -124,8 +142,7 @@ function OnlineUsers() {
 				var model = device.model + "";
 				if (ver <= 410 && device.platform == 'Android') {
 					this.device.isOldAndroid = true;
-					trace("**This is old device! " + navigator.appName + " model:" + device.model + " ver:"
-							+ device.version);
+					trace("**This is old device! " + navigator.appName + " model:" + device.model + " ver:" + device.version);
 				}
 				if (model.substring(0, 2) == "LG") {
 					trace("This is LG ...");
@@ -138,27 +155,37 @@ function OnlineUsers() {
 			}
 
 		} catch (e) {
-			debug("nastavimo device za development: " + e.message);
-			this.device.uuid = "Debug uuid";
-			this.device.platform = "Chrome";
-			this.device.model = navigator.appName.substring(0, 40) + " " + navigator.appVersion.substring(0, 9);
-			this.device.version = "35.0.1916.153 m";
-			this.device.isLG = false;
+			if (this.device == undefined || this.device.uuid == undefined) {
+				trace("nastavimo device za development: " + e.message);
+				this.device = {};
+				this.device.uuid = new Date().getTime();
+				this.device.platform = "Chrome";
+				this.device.model = navigator.appName.substring(0, 40) + " " + navigator.appVersion.substring(0, 9);
+				this.device.version = "35.0.1916.153 m";
+				this.device.isLG = false;
+				trace("**UUDI=" + this.device.uuid);
+			}
 		}
 		try {
-			trace("Device - device.platform:" + this.device.platform + " device.version:" + device.version
-					+ " device.uuid:" + this.device.uuid + " device.model:" + this.device.model
-					+ " navigator.appVersion: " + navigator.appVersion);
+			trace("***Device - device.platform:" + this.device.platform + " device.version:" + device.version + " device.uuid:"
+					+ this.device.uuid + " device.model:" + this.device.model + " navigator.appVersion: " + navigator.appVersion);
 		} catch (e) {
 			error(e.message);
 		}
+		trace("****UUDI=" + this.device.uuid);
 		return this.device;
 	};
+
+	this.onBatteryStatus = function(info) {
+		trace("Battery Level: " + info.level + " isPlugged: " + info.isPlugged);
+		app.battery = info;
+	}
 
 };
 
 function User() {
 	this.userName = "";
+	this.user = "";
 	this.uuid = null;
 	this.poly = null;
 	this.marker = null;
@@ -202,18 +229,26 @@ function pushGPS(position) {
 		data.lng = trackpoint.longitude;
 		data.alt = trackpoint.altitude;
 		data.user = user;
+		data.tst = new Date().getTime();
+		data.speed = trackpoint.speed;
+		data.accuracy = trackpoint.accuracy;
+		data.heading = trackpoint.heading;
 
 		data.uuid = app.getDevice().uuid;
 
+		data.battery = {};
+		data.battery.level = app.battery.level;
+		data.battery.isPlugged = app.battery.isPlugged;
+		trace("battery:" + app.battery.level);
+
 		try {
-			trace("sending msg...");
+			trace("sending msg... " + JSON.stringify(data));
 			socket.emit('put_position', JSON.stringify(data));
 		} catch (e) {
 			trace("send error ... " + e.message);
 		}
 	} else {
-		trace("Socket is null");
-
+		error("Socket is null...");
 	}
 
 	data = user = null;
@@ -325,6 +360,23 @@ function echo(object, prepend) {
 	trace(prepend + "->" + JSON.stringify(object));
 }
 
+function toast(msg, timoutInMilis) {
+	var timeout = timoutInMilis || 3000;
+
+	$("<div class='ui-loader ui-overlay-shadow ui-body-c ui-corner-all' style='ovelay: hidden'><h4>" + msg + "</h4></div>").css({
+		display : "block",
+		opacity : 0.98,
+		position : "fixed",
+		padding : "7px",
+		"text-align" : "center",
+		width : "270px",
+		left : ($(window).width() - 284) / 2,
+		top : $(window).height() / 3
+	}).appendTo($.mobile.pageContainer).delay(timeout).fadeOut(400, function() {
+		$(this).remove();
+	});
+}
+
 function trace(msg) {
 	console.log("TRACE: " + msg);
 };
@@ -340,38 +392,3 @@ function error(msg) {
 	console.error("***ERROR: " + msg);
 };
 
-function initWebSockets() {
-	trace("initWebSockets ...");
-
-	// Open a WebSocket connection.
-	websocket = new WebSocket(remoteAddress + "?gap");
-
-	// Connected to server
-	websocket.onopen = function(ev) {
-		trace('ws:// Connected to server: ' + remoteAddress);
-	};
-
-	// Connection close
-	websocket.onclose = function(ev) {
-		trace('ws:// Disconnected fom: ' + remoteAddress);
-	};
-
-	// Message Receved
-	websocket.onmessage = function(ev) {
-		trace('ws:// Message ' + ev.data);
-		// $("#status").html('ws:// Message: ' + ev.data);
-
-		var ff = JSON.parse(ev.data);
-		$("#followers").val(ff.f);
-		followers = ff.f;
-		trace("foloweres: " + followers);
-	};
-
-	// Error
-	websocket.onerror = function(ev) {
-		trace('ws:// Error ' + ev.data);
-		$("#status").html('Error connecting to websocket.');
-		$("#msg").html('Error connecting to websocket. Check your internet connection.');
-	};
-
-}
